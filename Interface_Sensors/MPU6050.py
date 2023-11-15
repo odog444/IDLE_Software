@@ -2,72 +2,85 @@
 # Author: Nick Boggess
 # Last Edit: 11/9/2023
 
-import smbus2
-import math
-import time
+'''
+        Read Gyro and Accelerometer by Interfacing Raspberry Pi with MPU6050 using Python
+	http://www.electronicwings.com
+'''
+import smbus2  # import SMBus module of I2C
+from time import sleep  # import
 
-# Power management registers
-power_mgmt_1 = 0x6b
-power_mgmt_2 = 0x6c
-
-def read_byte(adr):
-    return bus.read_byte_data(address, adr)
-
-def read_word(adr):
-    high = bus.read_byte_data(address, adr)
-    low = bus.read_byte_data(address, adr+1)
-    val = (high << 8) + low
-    return val
-
-def read_word_2c(adr):
-    val = read_word(adr)
-    if (val >= 0x8000):
-        return -((65535 - val) + 1)
-    else:
-        return val
-
-def dist(a,b):
-    return math.sqrt((a*a)+(b*b))
-
-def get_y_rotation(x,y,z):
-    radians = math.atan2(x, dist(y,z))
-    return -math.degrees(radians)
-
-def get_x_rotation(x,y,z):
-    radians = math.atan2(y, dist(x,z))
-    return math.degrees(radians)
+# some MPU6050 Registers and their Address
+PWR_MGMT_1 = 0x6B
+SMPLRT_DIV = 0x19
+CONFIG = 0x1A
+GYRO_CONFIG = 0x1B
+INT_ENABLE = 0x38
+ACCEL_XOUT_H = 0x3B
+ACCEL_YOUT_H = 0x3D
+ACCEL_ZOUT_H = 0x3F
+GYRO_XOUT_H = 0x43
+GYRO_YOUT_H = 0x45
+GYRO_ZOUT_H = 0x47
 
 
-bus = smbus2.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
-address = 0x68       # This is the address value read via the i2cdetect command
+def MPU_Init():
+    # write to sample rate register
+    bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
 
-# Now wake the 6050 up as it starts in sleep mode
-bus.write_byte_data(address, power_mgmt_1, 0)
+    # Write to power management register
+    bus.write_byte_data(Device_Address, PWR_MGMT_1, 1)
+
+    # Write to Configuration register
+    bus.write_byte_data(Device_Address, CONFIG, 0)
+
+    # Write to Gyro configuration register
+    bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
+
+    # Write to interrupt enable register
+    bus.write_byte_data(Device_Address, INT_ENABLE, 1)
+
+
+def read_raw_data(addr):
+    # Accelero and Gyro value are 16-bit
+    high = bus.read_byte_data(Device_Address, addr)
+    low = bus.read_byte_data(Device_Address, addr + 1)
+
+    # concatenate higher and lower value
+    value = ((high << 8) | low)
+
+    # to get signed value from mpu6050
+    if (value > 32768):
+        value = value - 65536
+    return value
+
+
+bus = smbus2.SMBus(1)  # or bus = smbus.SMBus(0) for older version boards
+Device_Address = 0x68  # MPU6050 device address
+
+MPU_Init()
+
+print(" Reading Data of Gyroscope and Accelerometer")
 
 while True:
-    time.sleep(0.1)
-    gyro_xout = read_word_2c(0x43)
-    gyro_yout = read_word_2c(0x45)
-    gyro_zout = read_word_2c(0x47)
+    # Read Accelerometer raw value
+    acc_x = read_raw_data(ACCEL_XOUT_H)
+    acc_y = read_raw_data(ACCEL_YOUT_H)
+    acc_z = read_raw_data(ACCEL_ZOUT_H)
 
-    print ("gyro_xout : ", gyro_xout, " scaled: ", (gyro_xout / 131))
-    print ("gyro_yout : ", gyro_yout, " scaled: ", (gyro_yout / 131))
-    print ("gyro_zout : ", gyro_zout, " scaled: ", (gyro_zout / 131))
+    # Read Gyroscope raw value
+    gyro_x = read_raw_data(GYRO_XOUT_H)
+    gyro_y = read_raw_data(GYRO_YOUT_H)
+    gyro_z = read_raw_data(GYRO_ZOUT_H)
 
-    accel_xout = read_word_2c(0x3b)
-    accel_yout = read_word_2c(0x3d)
-    accel_zout = read_word_2c(0x3f)
+    # Full scale range +/- 250 degree/C as per sensitivity scale factor
+    Ax = acc_x / 16384.0
+    Ay = acc_y / 16384.0
+    Az = acc_z / 16384.0
 
-    accel_xout_scaled = accel_xout / 16384.0
-    accel_yout_scaled = accel_yout / 16384.0
-    accel_zout_scaled = accel_zout / 16384.0
+    Gx = gyro_x / 131.0
+    Gy = gyro_y / 131.0
+    Gz = gyro_z / 131.0
 
-    print ("accel_xout: ", accel_xout, " scaled: ", accel_xout_scaled)
-    print ("accel_yout: ", accel_yout, " scaled: ", accel_yout_scaled)
-    print ("accel_zout: ", accel_zout, " scaled: ", accel_zout_scaled)
-
-    print ("x rotation: " , get_x_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled))
-    print ("y rotation: " , get_y_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled))
-
-    time.sleep(1)
-
+    print("Gx=%.2f" % Gx, u'\u00b0' + "/s", "\tGy=%.2f" % Gy, u'\u00b0' + "/s", "\tGz=%.2f" % Gz, u'\u00b0' + "/s",
+          "\tAx=%.2f g" % Ax, "\tAy=%.2f g" % Ay, "\tAz=%.2f g" % Az)
+    sleep(1)
