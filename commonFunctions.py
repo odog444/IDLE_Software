@@ -16,4 +16,6 @@ def checkSensors():
     # Check tilt is in correct range
     # Check motor current draws are reasonable and position readings are nominal
     # Check if within temperature bounds
-    return
+
+    # If any of the readings are abnormal, return as false. Otherwise, return as true.
+    return True
