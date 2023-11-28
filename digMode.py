@@ -1,4 +1,4 @@
-# Bryce 
+# Bryce
 import commonFunctions
 
 def digMode():
@@ -15,3 +15,5 @@ def dig():
         if(not systemCheck()): # Continuously check if system is running nominally while digging
             enterSafeMode()
     diggerMotor.isOn = False
+    
+    return

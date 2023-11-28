@@ -10,3 +10,10 @@ def systemCheck(): # Check if all sensors have nominal readings and
 def enterSafeMode():
     # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
     safeMode()
+    return
+
+def checkSensors():
+    # Check tilt is in correct range
+    # Check motor current draws are reasonable and position readings are nominal
+    # Check if within temperature bounds
+    return
