@@ -1,4 +1,5 @@
 # converts throttle setting from -1 to 1 to the associated motor signal pulse range 
+# right now it just outputs the microsecond delay and pulse range based on the throttle from -1 to 1
 
 throttle = float(input("Input a number from -1 to 1: "))
 
