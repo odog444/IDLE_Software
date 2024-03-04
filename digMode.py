@@ -1,19 +1,39 @@
-# Bryce
 import commonFunctions
+import sleepMode
+
+timer = 0   # Placeholder
+timerEnd = 15  # Placeholder
 
 def digMode():
-    if(systemCheck()): 
+    # initial health check
+    if(commonFunctions.systemCheck()): 
         dig()
     else:
-        enterSafeMode()
+        commonFunctions.enterSafeMode()
 
     return
 
 def dig():
-    diggerMotor.isOn = True
-    while(weightCollected <= 0.5):
-        if(not systemCheck()): # Continuously check if system is running nominally while digging
-            enterSafeMode()
-    diggerMotor.isOn = False
     
+    # power on drum
+    commonFunctions.startDrum()
+
+    # lower drum
+    commonFunctions.lowerDrum()
+
+    # start timer 
+
+    # continuously check sensors and dig timer
+    while timer <= timerEnd:
+        if(not commonFunctions.systemCheck()):
+            commonFunctions.enterSafeMode()
+
+        
+    
+    print("Dig cycle complete. Entering sleep mode")
+
+    sleepMode.SleepMode()
+
+
     return
+

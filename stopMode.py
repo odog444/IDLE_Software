@@ -1,5 +1,3 @@
-# Author: Mackenzie Davis
-# Last Edited: 11/8/2023
 
 import commonFunctions
 import sleepMode
