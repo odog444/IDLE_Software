@@ -19,3 +19,10 @@ def checkSensors():
 
     # If any of the readings are abnormal, return as false. Otherwise, return as true.
     return True
+
+def stopDrum():
+    pass # Placeholder for stopping drum
+
+def receiveInput():
+    # Receive input from Gui
+    pass # Placeholder
