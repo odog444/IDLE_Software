@@ -173,6 +173,7 @@ if __name__ == "__main__":
     RootGUI()
     BUTTONS()
     RUNNING_TIMER()
+    DataProcessing()
 
 
 
