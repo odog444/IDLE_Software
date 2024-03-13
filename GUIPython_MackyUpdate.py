@@ -34,10 +34,10 @@ class BUTTONS():
     def __init__(self, root):
         self.root = root
         self.frame = LabelFrame(root, text="Mode Commands", padx=25, pady=25, fg = "white", bg="black")
-        self.DIG = Button(self.frame, text="DIG", bg="grey", width=15, command=self.digcheck)
-        self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=15, command=self.safecheck)
-        self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=15, command=self.sleepcheck)
-        self.STOP = Button(self.frame, text="STOP", bg="grey", width=15, command=self.stopcheck)
+        self.DIG = Button(self.frame, text="DIG", bg="grey", width=25, command=self.digcheck)
+        self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=25, command=self.safecheck)
+        self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=25, command=self.sleepcheck)
+        self.STOP = Button(self.frame, text="STOP", bg="grey", width=25, command=self.stopcheck)
 
         # self.OpenButton()
         self.publish2()
