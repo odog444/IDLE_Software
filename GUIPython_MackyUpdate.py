@@ -12,6 +12,7 @@ from faker import Faker
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkmacosx import Button
 from itertools import count
 import pandas as pd
 
@@ -313,7 +314,7 @@ def systemCheck(): # Check if all sensors have nominal readings and
 
 def enterSafeMode():
     # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
-    SafeMode()
+    #  SafeMode()
     return
 
 
