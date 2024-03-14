@@ -20,13 +20,13 @@ class RootGUI:
     def __init__(self):
         self.root = Tk()  # initialising root
         self.root.title("IDLE GUI Bruh")
-        self.root.geometry("1440x820")
-        self.root.resizable(True,True)
+        # self.root.geometry("1440x820")
+        self.root.resizable(True, True)
         self.root.config(bg="black")
-        #self.root.columnconfigure(0, weight=1)
-        #self.root.rowconfigure(0,weight=1)
-        #sizegrip = ttk.Sizegrip(self.root)
-        #sizegrip.grid(row=1, sticky=SE)
+        # self.root.columnconfigure(0, weight=1)
+        # self.root.rowconfigure(0,weight=1)
+        # sizegrip = ttk.Sizegrip(self.root)
+        # sizegrip.grid(sticky=SE)
 
 # Building Frame:
 
@@ -34,10 +34,10 @@ class BUTTONS():
     def __init__(self, root):
         self.root = root
         self.frame = LabelFrame(root, text="Mode Commands", padx=25, pady=25, fg = "white", bg="black")
-        self.DIG = Button(self.frame, text="DIG", bg="grey", width=25, command=self.digcheck)
-        self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=25, command=self.safecheck)
-        self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=25, command=self.sleepcheck)
-        self.STOP = Button(self.frame, text="STOP", bg="grey", width=25, command=self.stopcheck)
+        self.DIG = Button(self.frame, text="DIG", bg="grey", width=50, command=self.digcheck)
+        self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=50, command=self.safecheck)
+        self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=50, command=self.sleepcheck)
+        self.STOP = Button(self.frame, text="STOP", bg="grey", width=50, command=self.stopcheck)
 
         # self.OpenButton()
         self.publish2()
