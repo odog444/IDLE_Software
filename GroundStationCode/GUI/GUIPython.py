@@ -20,6 +20,7 @@ pause = True
 startNow = time.time()
 ElapsedTime = 0
 timerup = 900
+# test
 
 # Client/server setup:
 serverAddress = ('172.20.10.7', 2222)
