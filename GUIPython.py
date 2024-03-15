@@ -31,37 +31,126 @@ class RootGUI:
         self.root.geometry("1440x820")
         self.root.resizable(True,True)
         self.root.config(bg="black")
-        # self.root.columnconfigure(0, weight=1)
-        # self.root.rowconfigure(0,weight=1)
-        # sizegrip = ttk.Sizegrip(self.root)
-        # sizegrip.grid(row=1, sticky=SE)
+        #self.root.columnconfigure(0, weight=1)
+        #self.root.rowconfigure(0,weight=1)
+        #sizegrip = ttk.Sizegrip(self.root)
+        #sizegrip.grid(row=1, sticky=SE)
 
 # Building Frame:
+
 
 class BUTTONS():
     def __init__(self, root):
         self.root = root
-        self.frame = LabelFrame(root, text="Mode Commands", padx=25, pady=25, bg="black")
+        self.frame = LabelFrame(root, text="Mode Commands", padx=25, pady=25, fg = "white", bg="black")
         self.DIG = Button(self.frame, text="DIG", bg="grey", width=15, command=self.digcheck)
         self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=15, command=self.safecheck)
-        self.SLEEP = Button(self.frame, text="SLEEP", bg="grey", width=15, command=self.sleepcheck)
-        self.STOP = Button(self.frame, text="STOP", bg="red", width=15, command=self.stopcheck)
+        self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=15, command=self.sleepcheck)
+        self.STOP = Button(self.frame, text="STOP", bg="grey", width=15, command=self.stopcheck)
 
         # self.OpenButton()
         self.publish2()
 
     def digcheck(self):
+        self.DIG.configure(bg = "red")
+        self.SAFE.configure(bg = "grey")
+        self.SLEEP.configure(bg = "grey")
+        self.STOP.configure(bg = "grey")
         print("Dig Pressed")
 
+
+
+        def digMode():
+    # initial health check
+            if(systemCheck()): 
+                dig()
+            else:
+                enterSafeMode()
+            return
+
+        def dig():
+            global pause
+            global startNow
+            global ElapsedTime             
+
+            # power on drum- Use GUI for now- make autonomous later (time permitting)
+            startDrum()
+
+    # lower drum- Use GUI for now- make autonomous later (time permitting) 
+            lowerDrum()
+
+
+
+            if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
+                ElapsedTime = 0
+
+            else:
+                pass
+
+            pause = False
+            startNow = time.time()
+            UpdateElapsedTime()
+            RUNNING_TIMER
+
+            
+
+        
+        
+        digMode()
+        
+
+       
+        
+
+
     def safecheck(self):
+        self.DIG.configure(bg = "grey")
+        self.SAFE.configure(bg = "red")
+        self.SLEEP.configure(bg = "grey")
+        self.STOP.configure(bg = "grey")
         print("Safe Pressed")
+            
+
+
+
 
     def sleepcheck(self):
+        self.DIG.configure(bg = "grey")
+        self.SAFE.configure(bg = "grey")
+        self.SLEEP.configure(bg = "red")
+        self.STOP.configure(bg = "grey")
         print("Sleep Pressed")
 
+
+            
+
     def stopcheck(self):
+        self.DIG.configure(bg = "grey")
+        self.SAFE.configure(bg = "grey")
+        self.SLEEP.configure(bg = "grey")
+        self.STOP.configure(bg = "red")
         print("Stop Pressed")
 
+        global pause
+
+
+        # stop drum- Use GUI for now- make autonomous later (time permitting)  
+        stopDrum()
+
+    
+        pause = True
+    
+        # Check elapsed time
+        if ElapsedTime < timerup:
+            UpdateElapsedTime()        
+            print("Dig Cycle paused. System is in Stop Mode") 
+        elif ElapsedTime >= timerup:
+            print("15-minute dig cycle has been completed. Retracting all systems.") 
+
+        # enter sleep mode
+
+
+    
 
     def publish2(self):
         self.frame.grid(row=0, column=0)
@@ -70,44 +159,60 @@ class BUTTONS():
         self.SLEEP.grid(column=3, row=1)
         self.STOP.grid(column=4, row=1)
 
-class RUNNING_TIMER:
-    def __init__(self, root):
+
+class RUNNING_TIMER():  
+    
+    def __init__(self, root): 
         self.start_time = time.time()
         self.root = root
-        self.frame4 = LabelFrame(root, text="Live Time", padx=25, pady=25, bg="black")
-        self.time_passed = Label(root, text="", font=("Helvectica", 37), bg="black")
-        self.threading = False
+        self.frame4 = LabelFrame(root, text="Live Time", padx=25, pady=25, fg= "white", bg="black")
+        self.time_passed = Label(root, text="", font=("Helvectica", 37), fg= "white", bg="black")
+        self.threading = FALSE
 
+    
         self.updatetime()
         self.publish3()
+        
 
     def updatetime(self):
+        global pause
+        global ElapsedTime
         self.start_time2 = time.time()
-        self.current_time = int(self.start_time2 - self.start_time)
-        # print(self.current_time)
+        self.current_time = int(self.start_time2 - startNow + ElapsedTime)
         sec = ""
-        if self.current_time < 60:
-            if self.current_time < 10:
-                sec = ("0" + str(self.current_time))
-            elif self.current_time >= 10:
-                sec = str(self.current_time)
-        elif self.current_time >= 60:
+        if self.current_time < timerup:
+            min = int(self.current_time/60)
             sec_entire = self.current_time
             minsec = sec_entire/60
             minsecmin = int(minsec)
-            secval = int((minsec - minsecmin)*60)
-            if secval < 10:
-                sec = ("0" + str(secval))
-            elif secval >= 10:
-                sec = str(secval)
+            sec = int((minsec - minsecmin)*60)
+        elif self.current_time == timerup:
+            pause = True
+            UpdateElapsedTime()
+        elif self.current_time > timerup:
+            min = int(timerup/60)
+            sec = int(0)
+            
+     
 
-        min = int(self.current_time/60)
-        self.time_passed.config(text=str(min) + ":" + sec)
-        self.time_passed.after(10, self.updatetime)
+        if pause == False:
+            self.time_passed.config(text = "{m:02d} : {s:02d}".format(m=min,s=sec), fg = "white", bg = "black")
+            self.time_passed.after(100, self.updatetime)
+        elif pause == True:
+            min = int(ElapsedTime/60)
+            sec_entire = ElapsedTime
+            minsec = sec_entire/60
+            minsecmin = int(minsec)
+            sec = int((minsec - minsecmin)*60)
+            self.time_passed.config(text = "{m:02d} : {s:02d}".format(m=min,s=sec), fg = "red", bg = "black")
+            self.time_passed.after(100, self.updatetime)
+    
 
     def publish3(self):
         self.frame4.grid(row=1, column=1, sticky=N)
         self.time_passed.grid()
+
+    
 
 class DataProcessing:
     def __init__(self, root):
@@ -148,6 +253,7 @@ class DataProcessing:
     def publish5(self):
         self.frame5.grid(row=3, column=0, sticky=NE)
         self.canvas.get_tk_widget().grid()
+
 
     def live_dat(self):
         self.threading = True
