@@ -19,7 +19,13 @@ import pandas as pd
 pause = True 
 startNow = time.time()
 ElapsedTime = 0
-timerup = 20
+timerup = 900
+
+# Client/server setup:
+serverAddress = ('172.20.10.7', 2222)
+buffer = 1024
+UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
 
 
 class RootGUI:
@@ -55,6 +61,9 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "grey")
         print("Dig Pressed")
+        command = "Dig Mode"
+        command = command.encode('utf-8')
+        UDPClient.sendto(command, serverAddress)
 
         global pause
         global startNow
@@ -78,7 +87,9 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "grey")
         print("Safe Pressed")
-            
+        command = "Safe Mode"
+        command = command.encode('utf-8')
+        UDPClient.sendto(command, serverAddress)
 
 
 
@@ -89,6 +100,9 @@ class BUTTONS():
         self.SLEEP.configure(bg = "red")
         self.STOP.configure(bg = "grey")
         print("Sleep Pressed")
+        command = "Sleep Mode"
+        command = command.encode('utf-8')
+        UDPClient.sendto(command, serverAddress)
 
 
             
@@ -99,6 +113,9 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "red")
         print("Stop Pressed")
+        command = "Stop Mode"
+        command = command.encode('utf-8')
+        UDPClient.sendto(command, serverAddress)
 
         global pause
 
