@@ -12,6 +12,7 @@ from faker import Faker
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# from tkmacosx import Button
 from itertools import count
 import pandas as pd
 
