@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from itertools import count
+from tkmacosx import Button
 import pandas as pd
 
 # Initializing variables for timer
