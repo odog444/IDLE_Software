@@ -3,7 +3,6 @@
 # Root: the base GUI box/platform thing that everything shows up on
 # Frame: basically just sub-roots that can have data visuallisation or other similar things on them
 # Wigets: Buttons and stuff like that seen on the frames
-import os.path
 import threading
 import time
 import csv
@@ -13,7 +12,6 @@ from faker import Faker
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from tkmacosx import Button
 from itertools import count
 import pandas as pd
 
@@ -22,7 +20,7 @@ pause = True
 print("Pause = " + str(pause))
 startNow = time.time()
 ElapsedTime = 0
-timerup = 20
+timerup = 900
 
 
 class RootGUI:
@@ -122,8 +120,6 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "red")
         print("Stop Pressed")
-        stop_csv = open('DATA_FAKE_YIKES2.csv', 'r')
-        stop_csv.close()
 
         global pause
 
@@ -131,12 +127,11 @@ class BUTTONS():
         # stop drum- Use GUI for now- make autonomous later (time permitting)  
         stopDrum()
 
-        if pause == False:
-            pause = True
-            UpdateElapsedTime()
-            RUNNING_TIMER
-        elif pause == True: 
-            pass
+    
+        pause = True
+        UpdateElapsedTime()
+        RUNNING_TIMER
+        
 
         # Check elapsed time
         if ElapsedTime < timerup:
@@ -233,17 +228,17 @@ class DataProcessing:
         while self.threading:
             with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
                 data_csv = csv.reader(csv_file_test)
-                # print(data_csv)
-                # self.ax.scatter(data_csv[3], data_csv[0])
+                self.timepassed = time.time()
+                self.current_time = self.timepassed - self.start_time
                 for line in data_csv:
+                    # self.ax.
                     rows.append(line)
                     self.rows = rows[-1]
-                    rows2int = [eval(i) for i in self.rows]
-                    self.ax.scatter(rows2int[3], rows2int[0])
+                    self.ax.scatter(self.rows,self.rows)
                     self.canvas.draw()
-                    print(rows2int)
+                    #print(self.rows)
 
-                # time.sleep(3)
+                time.sleep(3)
 
 
     def publish5(self):
@@ -253,49 +248,25 @@ class DataProcessing:
 
     def live_dat(self):
         self.threading = True
-        acc_axes = ["X", "Y", "Z", "timer"]
-        # timer_col = ["time"]
-        start_time_csv = time.time()
-        file_check = 'DATA_FAKE_YIKES2.csv'
-        if os.path.exists(file_check) and os.path.isfile(file_check):
-            os.remove(file_check)
-            print("Old CSV Data Removed")
-        else:
-            print("No Past Data in CSV")
-
+        acc_axes = ["X", "Y", "Z"]
         with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
             write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
             write_file.writeheader()
-
-        # with open('TIMER.csv', 'w') as csv_file2:
-        #     write_file2 = csv.DictWriter(csv_file2, fieldnames=timer_col)
-        #     write_file2.writeheader()
-
         while self.threading:
             try:
-                time_current = time.time()
-                self.time_passed = time_current - start_time_csv
+                # time_current = time.time()
+                # self.time_passed = time_current - start_time
                 fake_data = Faker()
                 self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
-                # print(self.time_passed)
-                # print(self.DATA_FAKE)
+                # self.print_dat = float(self.DATA_FAKE[0])
                 with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
                     write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
                     dat = {
                         "X": self.DATA_FAKE[0],
                         "Y": self.DATA_FAKE[1],
-                        "Z": self.DATA_FAKE[2],
-                        "timer": self.time_passed
+                        "Z": self.DATA_FAKE[2]
                     }
-                    # print(dat)
                     write_file.writerow(dat)
-
-                # with open('TIMER.csv', 'a') as csv_file2:
-                #     write_file2 = csv.DictWriter(csv_file2, fieldnames=timer_col)
-                #     dat2 = {
-                #         "time": self.time_passed
-                #     }
-                #     write_file2.writerow(dat2)
                 time.sleep(3)
 
             except:
@@ -379,7 +350,7 @@ def systemCheck(): # Check if all sensors have nominal readings and
 
 def enterSafeMode():
     # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
-    # SafeMode()
+    SafeMode()
     return
 
 
