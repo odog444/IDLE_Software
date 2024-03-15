@@ -12,7 +12,6 @@ from faker import Faker
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-# from tkmacosx import Button
 from itertools import count
 import pandas as pd
 
@@ -21,7 +20,7 @@ pause = True
 print("Pause = " + str(pause))
 startNow = time.time()
 ElapsedTime = 0
-timerup = 900
+timerup = 20
 
 
 class RootGUI:
@@ -71,24 +70,33 @@ class BUTTONS():
         def dig():
             global pause
             global startNow
+            global ElapsedTime             
 
-# power on drum- Use GUI for now- make autonomous later (time permitting)
+            # power on drum- Use GUI for now- make autonomous later (time permitting)
             startDrum()
 
     # lower drum- Use GUI for now- make autonomous later (time permitting) 
             lowerDrum()
 
-    # start timer*********
+
+
+            if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
+                ElapsedTime = 0
+
+            else:
+                pass
+
             pause = False
             startNow = time.time()
             UpdateElapsedTime()
             RUNNING_TIMER
 
-    
+            
+
         
         
         digMode()
-    
+        
 
        
         
@@ -130,14 +138,11 @@ class BUTTONS():
 
     
         pause = True
-        UpdateElapsedTime()
-        RUNNING_TIMER
-        
-
+    
         # Check elapsed time
         if ElapsedTime < timerup:
-            print("Dig Cycle paused. System is in Stop Mode")
-        # if elapsed time >= 15 min, 
+            UpdateElapsedTime()        
+            print("Dig Cycle paused. System is in Stop Mode") 
         elif ElapsedTime >= timerup:
             print("15-minute dig cycle has been completed. Retracting all systems.") 
 
@@ -186,6 +191,7 @@ class RUNNING_TIMER():
         elif self.current_time > timerup:
             min = int(timerup/60)
             sec = int(0)
+            
      
 
         if pause == False:
@@ -199,6 +205,7 @@ class RUNNING_TIMER():
             sec = int((minsec - minsecmin)*60)
             self.time_passed.config(text = "{m:02d} : {s:02d}".format(m=min,s=sec), fg = "red", bg = "black")
             self.time_passed.after(100, self.updatetime)
+    
 
     def publish3(self):
         self.frame4.grid(row=1, column=1, sticky=N)
