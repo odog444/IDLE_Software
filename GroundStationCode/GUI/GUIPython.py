@@ -14,11 +14,9 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from itertools import count
 import pandas as pd
-from tkmacosx import Button
 
-# Initializing variables
+# Initializing variables for timer
 pause = True 
-print("Pause = " + str(pause))
 startNow = time.time()
 ElapsedTime = 0
 timerup = 20
@@ -58,49 +56,20 @@ class BUTTONS():
         self.STOP.configure(bg = "grey")
         print("Dig Pressed")
 
+        global pause
+        global startNow
+        global ElapsedTime             
 
+        if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
+            ElapsedTime = 0
 
-        def digMode():
-    # initial health check
-            if(systemCheck()): 
-                dig()
-            else:
-                enterSafeMode()
-            return
+        else:
+            pass
 
-        def dig():
-            global pause
-            global startNow
-            global ElapsedTime             
-
-            # power on drum- Use GUI for now- make autonomous later (time permitting)
-            startDrum()
-
-    # lower drum- Use GUI for now- make autonomous later (time permitting) 
-            lowerDrum()
-
-
-
-            if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
-                ElapsedTime = 0
-
-            else:
-                pass
-
-            pause = False
-            startNow = time.time()
-            UpdateElapsedTime()
-            RUNNING_TIMER
-
-            
-
-        
-        
-        digMode()
-        
-
-       
-        
+        pause = False
+        startNow = time.time()
+        UpdateElapsedTime()
+        RUNNING_TIMER
 
 
     def safecheck(self):
@@ -133,11 +102,6 @@ class BUTTONS():
 
         global pause
 
-
-        # stop drum- Use GUI for now- make autonomous later (time permitting)  
-        stopDrum()
-
-    
         pause = True
     
         # Check elapsed time
@@ -146,8 +110,6 @@ class BUTTONS():
             print("Dig Cycle paused. System is in Stop Mode") 
         elif ElapsedTime >= timerup:
             print("15-minute dig cycle has been completed. Retracting all systems.") 
-
-        # enter sleep mode
 
 
     
@@ -348,63 +310,11 @@ class SlideLA():
         self.LA.grid()
 
 
-### Below are the commonFunctions
-
-
-def systemCheck(): # Check if all sensors have nominal readings and 
-    if(not checkSensors()):
-        return False
-    
-    return True # If none of the if statements run, everything is in working order
-
-def enterSafeMode():
-    # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
-    SafeMode()
-    return
-
-
-def checkSensors():
-    # Check tilt is in correct range
-    # Check motor current draws are reasonable and position readings are nominal
-    # Check if within temperature bounds
-
-    # If any of the readings are abnormal, return as false. Otherwise, return as true.
-    return True
-
-def stopDrum():
-
-    pass # Placeholder for stopping drum
-
-def startDrum():
-    print("drum started")
-    pass # Placeholder for starting drum spin
-
-def lowerDrum():
-    pass # Placeholder for lowering drum 
-
-def raiseDrum():
-    pass # Placeholder for raising drum
-
-def pauseTimer():
-    global pause
-    if pause == False:
-        pause = True
-    elif pause == True:
-        pause = False
-    print("Pause = " + str(pause))
 
 def UpdateElapsedTime():
     global ElapsedTime
     ElapsedTime = int(time.time() - startNow + ElapsedTime)
-    print("Time Elapsed: " + str(ElapsedTime))
     
-    
-
-def receiveInput():
-    # Receive input from Gui
-    pass # Placeholder
-
-
 
 
 
