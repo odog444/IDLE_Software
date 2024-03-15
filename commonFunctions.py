@@ -1,5 +1,20 @@
 # Use this if you're using a function/chunk of code multiple times throughout your file, 
 # or if you think you would find the chunk of code/function useful in other functions
+
+# Imports from site-packages
+import sys
+import socket
+import csv
+import keyboard
+from multiprocessing import Process
+import time
+import numpy as np
+from faker import Faker
+
+# Local imports from IDLE software
+import sleepMode
+import safeMode
+import digMode
 import safeMode
 
 def systemCheck(): # Check if all sensors have nominal readings and 
@@ -35,5 +50,26 @@ def raiseDrum():
     pass # Placeholder for raising drum
 
 def receiveInput():
-    # Receive input from Gui
-    pass # Placeholder
+    modeToEnter = UDPClient.recvfrom(buffer)[0].decode('utf-8') # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
+
+    match modeToEnter: # Note: Remember to change print statements to send over to GS as statements to be printed on a console
+        case "Sleep Mode":
+            print("Sleep Mode entered.")
+            sleepmode.SleepMode()
+        case "Stop Mode":
+            print("Stop Mode entered.")
+            stopMode.StopMode()
+        case "Dig Mode":
+            print("Dig Mode entered.")
+            digMode.DigMode()
+        case "Safe Mode":
+            print("Safe Mode entered.")
+            safeMode.SafeMode()
+        case _:
+            print("Invalid input, please try from the follwing:\n \
+            Sleep Mode \
+            Stop Mode \
+            Dig Mode \
+            Safe Mode")
+            receiveInput()
+            

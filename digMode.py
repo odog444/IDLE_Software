@@ -4,7 +4,7 @@ import sleepMode
 timer = 0   # Placeholder
 timerEnd = 15  # Placeholder
 
-def digMode():
+def DigMode():
     # initial health check
     if(commonFunctions.systemCheck()): 
         dig()

@@ -43,6 +43,10 @@ def data_loop():
             write_file2.writerow(dat2)
 
 
+
+
+
+
 def data_loop(serverAddress, buffer, UDPClient, command):
     acc_axes = ["X", "Y", "Z"]
     with open('data.csv', 'w') as csv_file:
@@ -64,13 +68,43 @@ def data_loop(serverAddress, buffer, UDPClient, command):
             print(dat)
 
 if __name__ == '__main__':
-    # Client/server setup:
+    # client/server setup:
     serverAddress = ('172.20.10.7', 2222)
     buffer = 1024
     UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    command = input('Enter Mode: ')
+    command = input('Enter Start to Load Data: ')
     command = command.encode('utf-8')
     UDPClient.sendto(command, serverAddress)
-    # pro = Process(target=data_loop(serverAddress, buffer, UDPClient, command))
+    pro = Process(target=data_loop(serverAddress, buffer, UDPClient, command))
 
-    # data_loop()
+    data_loop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
