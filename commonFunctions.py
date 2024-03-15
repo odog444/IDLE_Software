@@ -67,9 +67,9 @@ def receiveInput():
             safeMode.SafeMode()
         case _:
             print("Invalid input, please try from the follwing:\n \
-            Sleep Mode \
-            Stop Mode \
-            Dig Mode \
+            Sleep Mode\n \
+            Stop Mode\n \
+            Dig Mode\n \
             Safe Mode")
             receiveInput()
             
