@@ -1,8 +1,8 @@
 # Main code which will call all of the sub-scripts
-import threading
 import socket
-
+import threading
 from GUIPython import RootGUI, BUTTONS, RUNNING_TIMER, DataProcessing, SlideMotor, SlideLA
+
 serverAddress = ('172.20.10.7', 2222)
 buffer = 1024
 UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

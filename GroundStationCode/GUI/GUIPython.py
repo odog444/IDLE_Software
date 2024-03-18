@@ -6,6 +6,7 @@
 import threading
 import time
 import csv
+import socket
 from tkinter import *
 from tkinter import ttk
 from faker import Faker
@@ -46,7 +47,7 @@ class RootGUI:
 
 
 class BUTTONS():
-    def __init__(self, root):
+    def __init__(self, root, buffer, UDPClient, serverAddress):
         self.root = root
         self.buffer = buffer
         self.UDPClient = UDPClient
