@@ -48,6 +48,17 @@ class RootGUI:
 class BUTTONS():
     def __init__(self, root):
         self.root = root
+        self.buffer = buffer
+        self.UDPClient = UDPClient
+        self.serverAddress = serverAddress
+        self.commanddig = 'Dig Pressed!'
+        self.commanddig = self.commanddig.encode('utf-8')
+        self.commandsafe = 'Safe Pressed!'
+        self.commandsafe = self.commandsafe.encode('utf-8')
+        self.commandstop = 'Stop Pressed!'
+        self.commandstop = self.commandstop.encode('utf-8')
+        self.commandsleep = 'Sleep Pressed!'
+        self.commandsleep = self.commandsleep.encode('utf-8')
         self.frame = LabelFrame(root, text="Mode Commands", padx=25, pady=25, fg = "white", bg="black")
         self.DIG = Button(self.frame, text="DIG", bg="grey", width=15, command=self.digcheck)
         self.SAFE = Button(self.frame, text="SAFE", bg="grey", width=15, command=self.safecheck)
@@ -63,9 +74,7 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "grey")
         print("Dig Pressed")
-        command = "Dig Mode"
-        command = command.encode('utf-8')
-        UDPClient.sendto(command, serverAddress)
+        self.UDPClient.sendto(self.commanddig, self.serverAddress)
 
         global pause
         global startNow
@@ -90,8 +99,7 @@ class BUTTONS():
         self.STOP.configure(bg = "grey")
         print("Safe Pressed")
         command = "Safe Mode"
-        command = command.encode('utf-8')
-        UDPClient.sendto(command, serverAddress)
+        self.UDPClient.sendto(self.commandsafe, self.serverAddress)
 
 
 
@@ -103,8 +111,7 @@ class BUTTONS():
         self.STOP.configure(bg = "grey")
         print("Sleep Pressed")
         command = "Sleep Mode"
-        command = command.encode('utf-8')
-        UDPClient.sendto(command, serverAddress)
+        self.UDPClient.sendto(self.commandsleep, self.serverAddress)
 
 
             
@@ -115,9 +122,7 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "red")
         print("Stop Pressed")
-        command = "Stop Mode"
-        command = command.encode('utf-8')
-        UDPClient.sendto(command, serverAddress)
+        self.UDPClient.sendto(self.commandstop, self.serverAddress)
 
         global pause
 
