@@ -1,0 +1,20 @@
+# Raspberry Pi is server and laptop is client
+# This is done using a SOCKET
+# utf-8: Unicode Transformation Format - 8 bits
+
+import socket
+import time
+
+buffer = 1024
+msgfserver = "Heyo client"
+ServerPort = 2222
+ServerIP = '172.20.10.7'
+bytesSending = msgfserver.encode('utf-8')
+PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
+PSock.bind((ServerIP,ServerPort)) # binding the IP and port, the two (()) are important idk why lol
+print('Server is working and listening...')
+message,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client
+message = message.decode('utf-8')
+print(message)
+print('Client Address: ', address[0])
+PSock.sendto(bytesSending,address) # The client IP address doesn't matter because you are just accessing the server as the client and are sending your IP address

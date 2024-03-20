@@ -1,0 +1,25 @@
+import socket
+import time
+import readmpu6050
+
+buffer = 1024
+ServerPort = 2222
+ServerIP = '172.20.10.7'
+PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
+PSock.bind((ServerIP,ServerPort)) # binding the IP and port, the two (()) are important idk why lol
+print('Server is working and listening...')
+
+while True:
+    command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client
+    command = command.decode('utf-8')
+    print(command)
+    print('Client Address: ', address[0])
+    
+    if command == 'Start':
+        data = readmpu6050.READ_DATA()
+        data = data.encode('utf-8')
+        PSock.sendto(data,address) # The client IP address doesn't matter because you are just accessing the server as the client and are sending your IP address
+    else:
+        data = 'Waiting for command...'
+        data = data.encode('utf-8')
+        PSock.sendto(data,address)

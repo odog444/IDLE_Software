@@ -1,0 +1,28 @@
+# This code will take the UDP command of the FOUR Modes for the digger and implement them.
+# One button in the GUI will command each of the Modes and will be recieved by this code!
+
+import smbus
+from time import sleep
+import socket
+import time
+import os
+import shutil
+import subprocess
+import RPi.GPIO as GPIO
+import random
+from git import Repo
+
+buffer = 1024
+ServerPort = 2222
+ServerIP = '172.20.10.7'
+PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
+
+PSock.bind((ServerIP,ServerPort))
+
+print('Server is working and listening...')
+
+while True:
+    command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client (laptop)
+    command = command.decode('utf-8')
+    print(command)
+    print('Client Address: ', address[0])
