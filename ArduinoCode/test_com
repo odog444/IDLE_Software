@@ -1,0 +1,31 @@
+int counter = 0;
+
+void setup() {
+Serial.begin(115200); // 115200 = baud rate
+while(!Serial){}
+
+}
+
+void loop() {
+
+// Arduino sending data to Raspberry Pi:
+// Tx should be blinking
+//Serial.println("Sending this message over UART"); // println makes a new line every time it prints the message
+//delay(750);
+
+// Arduino recieving data from Raspberry Pi:
+// Rx should be blinking
+//  if (Serial.available() > 0){
+//    String message = Serial.readStringUntil('\n'); // make sure we don't time out
+//  }
+
+// Bidirectional communication:
+// Rx and Tx should both be blinking
+  if (Serial.available()>0){
+    String message = Serial.readStringUntil('\n');
+    message = message + " " + String(counter);
+    counter++;
+    Serial.println(message);
+  }
+
+}
