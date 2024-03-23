@@ -92,7 +92,6 @@ class BUTTONS():
         UpdateElapsedTime()
         RUNNING_TIMER
 
-
     def safecheck(self):
         self.DIG.configure(bg = "grey")
         self.SAFE.configure(bg = "red")
@@ -102,9 +101,6 @@ class BUTTONS():
         command = "Safe Mode"
         self.UDPClient.sendto(self.commandsafe, self.serverAddress)
 
-
-
-
     def sleepcheck(self):
         self.DIG.configure(bg = "grey")
         self.SAFE.configure(bg = "grey")
@@ -113,9 +109,6 @@ class BUTTONS():
         print("Sleep Pressed")
         command = "Sleep Mode"
         self.UDPClient.sendto(self.commandsleep, self.serverAddress)
-
-
-            
 
     def stopcheck(self):
         self.DIG.configure(bg = "grey")
@@ -135,9 +128,6 @@ class BUTTONS():
             print("Dig Cycle paused. System is in Stop Mode") 
         elif ElapsedTime >= timerup:
             print("15-minute dig cycle has been completed. Retracting all systems.") 
-
-
-    
 
     def publish2(self):
         self.frame.grid(row=0, column=0)
@@ -268,10 +258,14 @@ class DataProcessing:
             except:
                 pass
 
-
 class SlideMotor():
-    def __init__(self, root):
+    def __init__(self, root, buffer, UDPClient, serverAddress):
         self.root = root
+        self.buffer = buffer
+        self.UDPClient = UDPClient
+        self.serverAddress = serverAddress
+        self.commandmotorspeed = '---'
+        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
@@ -280,8 +274,7 @@ class SlideMotor():
    
         self.publish6()
 
-    
-    def motorspeed(self,v):
+    def motorspeed(self, v):
         self.frame6.config(text = "Motor Throttle = " + v, fg= "white", bg = "black")
         
         min = 500
@@ -303,6 +296,11 @@ class SlideMotor():
         
         self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         self.frame8.config(text = "Motor range = " + range, font=("Helvectica", 10), fg= "white", bg = "black")
+        v_str_val = str(v)
+        v_str = ('Motor Speed: ' + v_str_val)
+        self.commandmotorspeed = v_str
+        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+        self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
     
 
     def publish6(self):
@@ -313,8 +311,13 @@ class SlideMotor():
 
 
 class SlideLA():
-    def __init__(self, root):
+    def __init__(self, root, buffer, UDPClient, serverAddress):
         self.root = root
+        self.buffer = buffer
+        self.UDPClient = UDPClient
+        self.serverAddress = serverAddress
+        self.commandmotorspeed = '---'
+        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
         self.frame10 = Label(root, text = "Current Linear Actuator Position = 0 cm", padx=5, pady=5, fg= "white", bg="black")
         self.LA = Scale(self.frame9, from_=10, to=-10, orient=VERTICAL, length=400, showvalue=0,tickinterval=1, resolution=1, command=self.actuator)
@@ -325,6 +328,11 @@ class SlideLA():
     
     def actuator(self,v):
         self.frame10.config(text = "Current Linear Actuator Position = " + v + " cm", font=("Helvectica", 10), fg= "white", bg = "black")
+        v_str_val = str(v)
+        v_str = ('Actuator Extension: ' + v_str_val)
+        self.commandmotorspeed = v_str
+        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+        self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
         
         # Send command to arduino to move linear actuator
     
