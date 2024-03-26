@@ -26,21 +26,32 @@ except:
      print("IDLE_software folder is empty, continuting to clone github repo")
  
 Repo.clone_from("https://github.com/Rootbryce/IDLE_Software.git", "/home/idle/IDLE_software")
-    
-# This function is called by UDP_Data.py which then sends the data via UDP communication to the Ground Station!
-#def READ_DATA():
-    
-# This block of code is taken from a website
-#some MPU6050 Registers and their Address
-# PWR_MGMT_1   = 0x6B
-# SMPLRT_DIV   = 0x19
-# CONFIG       = 0x1A
-# GYRO_CONFIG  = 0x1B
-# INT_ENABLE   = 0x38
-# ACCEL_XOUT = 0x3B
-# ACCEL_YOUT = 0x3D
-# ACCEL_ZOUT = 0x3F
-# GYRO_XOUT  = 0x43
-# GYRO_YOUT  = 0x45
-# GYRO_ZOUT  = 0x47
 
+# Initialize GPIO pins on Pi
+'''
+NOTES ON PIN USAGE
+Linear Actuator:
+    Arduino:
+        PWM: pin 9
+        pin1: 8
+        Pin2: 7
+        Pin3: 6
+        Read in: 5 from Pi pin 32
+
+    Pi:
+        PWM: pin 32
+
+Drum motor:
+    Arduino:
+        Output drum: pin 3
+        PWM input: 10
+    
+    Pi:
+        PWM GPIO 13: pin 33
+'''
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(32, GPIO.OUT) # Linear Actuator control
+GPIO.setup(32, GPIO.OUT) # Drum motor control
+
+# Run main.py file
