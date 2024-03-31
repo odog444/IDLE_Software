@@ -40,6 +40,7 @@ Drum motor:
         PWM GPIO 13: pin 33
 '''
 
+
 def systemCheck(): # Check if all sensors have nominal readings and 
     if(not checkSensors()):
         return False

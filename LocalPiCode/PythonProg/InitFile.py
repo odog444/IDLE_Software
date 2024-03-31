@@ -30,6 +30,11 @@ Repo.clone_from("https://github.com/Rootbryce/IDLE_Software.git", "/home/idle/ID
 # Initialize GPIO pins on Pi
 '''
 NOTES ON PIN USAGE
+Sensors:
+    Current/Motor
+    Temperature
+    Tilt
+
 Linear Actuator:
     Arduino:
         PWM: pin 9
