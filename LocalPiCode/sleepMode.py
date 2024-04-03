@@ -12,8 +12,10 @@ def SleepMode():
 
 
 
-def Sleep(diggerMotorOn):
+def Sleep():
     
+
+    diggerMotorOn = True # Placeholder
     # check whether drum is spinning
     if(diggerMotorOn == True):
 
@@ -27,3 +29,5 @@ def Sleep(diggerMotorOn):
     
     return
     
+
+print("Sleep Mode Entered")

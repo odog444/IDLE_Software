@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from itertools import count
-from tkmacosx import Button
+#from tkmacosx import Button
 import pandas as pd
 
 # Initializing variables for timer
@@ -269,19 +269,20 @@ class SlideMotor():
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
-        self.motor = Scale(self.frame6, from_=-1, to=1, orient=HORIZONTAL, length=600, showvalue=0,tickinterval=0.1, resolution=0.01, command=self.motorspeed)
+        self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0,tickinterval=10, resolution=1, command=self.motorspeed)
         self.motor.pack()
    
         self.publish6()
 
     def motorspeed(self, v):
-        self.frame6.config(text = "Motor Throttle = " + v, fg= "white", bg = "black")
+        self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
         
-        min = 500
-        max = 2500
-
+        min = 500       #calculating microsecond delay displayed on GUI
+        max = 2500      
+        
         throttle = float(v)
-        delay = (throttle + 1)*(max - min)/2 + 500
+        delay = int((throttle + 100)*(max - min)/200 + 500)
+        delay_converted = int((throttle + 100)*5) # This value (between 0 and 1000) is sent to the Pi
 
         if delay <= min:
             range = "full reverse"
@@ -293,10 +294,12 @@ class SlideMotor():
             range = "prop. forward"
         else:
             range = "full forward"
+
+        self.UDPClient.sendto(delay_converted, self.serverAddress)
         
         self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         self.frame8.config(text = "Motor range = " + range, font=("Helvectica", 10), fg= "white", bg = "black")
-        v_str_val = str(v)
+        v_str_val = str(v)   # Is this what goes to the Pi?
         v_str = ('Motor Speed: ' + v_str_val)
         self.commandmotorspeed = v_str
         self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')

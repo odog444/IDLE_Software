@@ -14,7 +14,7 @@ import RPi.GPIO as GPIO
 
 # Local imports from IDLE software
 import sleepMode
-import safeMode
+import stopMode
 import digMode
 import safeMode
 
@@ -62,16 +62,23 @@ def checkSensors():
     return True
 
 def stopDrum():
-    pass # Placeholder for stopping drum
+    print("Drum stopped") # Placeholder for stopping drum
 
 def startDrum():
-    pass # Placeholder for starting drum spin
+    print("Drum Started") # Placeholder for starting drum spin
 
 def lowerDrum():
-    pass # Placeholder for lowering drum 
+    print("Drum Lowered") # Placeholder for lowering drum 
 
 def raiseDrum():
-    pass # Placeholder for raising drum
+    print("Drum Raised") # Placeholder for raising drum
+
+def moveDrum(delay_converted):
+    # Send out of 5v GPIO
+    pi_pwm = GPIO.PWM(33,1000)
+    pi_pwm.start(0)
+    pi_pwm.ChangeDutyCycle(delay_converted/10)
+
 
 def receiveInput():
     modeToEnter = UDPClient.recvfrom(buffer)[0].decode('utf-8') # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
@@ -79,10 +86,10 @@ def receiveInput():
     match modeToEnter: # Note: Remember to change print statements to send over to GS as statements to be printed on a console
         case "Sleep Mode":
             print("Sleep Mode entered.")
-            sleepmode.SleepMode()
+            sleepMode.SleepMode()
         case "Stop Mode":
             print("Stop Mode entered.")
-            stopMode.StopMode()
+            stopMode.StopMode() # add timer
         case "Dig Mode":
             print("Dig Mode entered.")
             digMode.DigMode()
@@ -96,4 +103,6 @@ def receiveInput():
             Dig Mode\n \
             Safe Mode")
             receiveInput()
+
+
             

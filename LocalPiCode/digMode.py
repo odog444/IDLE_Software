@@ -1,8 +1,10 @@
 import commonFunctions
+import time
 import sleepMode
 
-timer = 0   # Placeholder
-timerEnd = 15  # Placeholder
+
+ElapsedTime = 0 # Placeholder
+timerEnd = 15  # 15 minutes/900 seconds
 
 def DigMode():
     # initial health check
@@ -14,17 +16,20 @@ def DigMode():
     return
 
 def dig():
-    
-    # power on drum
-    commonFunctions.startDrum()
 
-    # lower drum
-    commonFunctions.lowerDrum()
+    # # power on drum
+    # commonFunctions.startDrum()
+
+    # # lower drum
+    # commonFunctions.lowerDrum()
 
     # start timer 
 
     # continuously check sensors and dig timer
-    while timer <= timerEnd:
+    while ElapsedTime <= timerEnd:
+        delay_converted = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        commonFunctions.moveDrum(delay_converted)
+
         if(not commonFunctions.systemCheck()):
             commonFunctions.enterSafeMode()
 
@@ -36,4 +41,3 @@ def dig():
 
 
     return
-

@@ -1,0 +1,31 @@
+import smbus
+from time import sleep
+import socket
+import time
+import os
+import shutil
+import subprocess
+import RPi.GPIO as GPIO
+import random
+from git import Repo
+
+
+# Function for checking if wifi is connected so that auto-run on boot will work:
+def checkIfWifiConnected(IP, Port, PSocket):
+    try:
+        PSocket.bind((IP,Port)) # binding the IP and port, the two (()) are important idk why lol
+    except:
+        print("Waiting for Wifi")
+    else:
+        return True
+        
+#Clear out local folder with IDLE code, then clone fresh copy of github repo
+try:
+     shutil.rmtree('/home/idle/IDLE_software')
+except:
+     print("IDLE_software folder is empty, continuting to clone github repo")
+ 
+Repo.clone_from("https://github.com/Rootbryce/IDLE_Software.git", "/home/idle/IDLE_software")
+    
+
+
