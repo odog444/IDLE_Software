@@ -54,9 +54,13 @@ Drum motor:
     Pi:
         PWM GPIO 13: pin 33
 '''
+LinPWMPin = 32
+DrumPWMPin = 33
+
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(32, GPIO.OUT) # Linear Actuator control
-GPIO.setup(32, GPIO.OUT) # Drum motor control
+GPIO.setup(LinPWMPin, GPIO.OUT) # Linear Actuator control
+GPIO.setup(DrumPWMPin, GPIO.OUT) # Drum motor control
+
 
 # Run main.py file

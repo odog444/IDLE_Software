@@ -79,6 +79,16 @@ def moveDrum(delay_converted):
     pi_pwm.start(0)
     pi_pwm.ChangeDutyCycle(delay_converted/10)
 
+def moveLinearActuator(Direction):
+    pass
+    if Direction == 'UP':
+        pass
+
+    elif Direction == 'DOWN':
+        pass
+    else:
+        pass
+
 
 def receiveInput():
     modeToEnter = UDPClient.recvfrom(buffer)[0].decode('utf-8') # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
