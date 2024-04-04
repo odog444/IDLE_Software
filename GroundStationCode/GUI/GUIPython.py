@@ -235,29 +235,56 @@ class DataProcessing:
 
     def live_dat(self):
         self.threading = True
-        acc_axes = ["X", "Y", "Z"]
-        with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
-            write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-            write_file.writeheader()
+        pos_count = 0
         while self.threading:
-            try:
-                # time_current = time.time()
-                # self.time_passed = time_current - start_time
-                fake_data = Faker()
-                self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
-                # self.print_dat = float(self.DATA_FAKE[0])
-                with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
-                    write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-                    dat = {
-                        "X": self.DATA_FAKE[0],
-                        "Y": self.DATA_FAKE[1],
-                        "Z": self.DATA_FAKE[2]
-                    }
-                    write_file.writerow(dat)
-                time.sleep(3)
+            msgfCli = 'Client'
+            bytes2send = msgfCli.encode('utf-8')
+            serverAddress = ('172.20.10.7', 2224)
+            buffer = 320
+            UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            UDPClient.sendto(bytes2send, serverAddress)
+            data, address = UDPClient.recvfrom(buffer)
+            line = data.decode('utf-8')
+            # print(line)
 
-            except:
-                pass
+            if line == "Temp:":
+                continue
+            elif line == "Acceleration":
+                continue
+            else:
+                pos_count += 1
+                if (pos_count % 2) == 0:
+                    acc_values = [float(x) for x in line.split(',')]
+                    print(acc_values)
+                else:
+                    temp_values = [float(x) for x in line.split(',')]
+                    print(temp_values)
+
+
+        # self.threading = True
+        # acc_axes = ["X", "Y", "Z"]
+        # with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
+        #     write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+        #     write_file.writeheader()
+        # while self.threading:
+        #     try:
+        #         # time_current = time.time()
+        #         # self.time_passed = time_current - start_time
+        #         fake_data = Faker()
+        #         self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
+        #         # self.print_dat = float(self.DATA_FAKE[0])
+        #         with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
+        #             write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+        #             dat = {
+        #                 "X": self.DATA_FAKE[0],
+        #                 "Y": self.DATA_FAKE[1],
+        #                 "Z": self.DATA_FAKE[2]
+        #             }
+        #             write_file.writerow(dat)
+        #         time.sleep(3)
+        #
+        #     except:
+        #         pass
 
 class SlideMotor():
     def __init__(self, root, buffer, UDPClient, serverAddress):
@@ -270,7 +297,7 @@ class SlideMotor():
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
-        self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0,tickinterval=10, resolution=1, command=self.motorspeed)
+        self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
         self.motor.pack()
    
         self.publish6()
