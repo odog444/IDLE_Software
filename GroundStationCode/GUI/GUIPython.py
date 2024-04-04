@@ -199,33 +199,63 @@ class DataProcessing:
         self.fig, self.ax = plt.subplots()
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
-        self.rows = []
-        self.figs = []
+        # self.rows = []
+        # self.figs = []
         self.current_time = []
 
-        self.t1 = threading.Thread(target=self.live_dat, daemon=True)
-        self.t2 = threading.Thread(target=self.readFile, daemon=True)
-        self.t1.start()
-        self.t2.start()
+        self.threading = True
+        pos_count = 0
+        msgfCli = 'Client'
+        bytes2send = msgfCli.encode('utf-8')
+        serverAddress = ('172.20.10.7', 2224)
+        buffer = 2048
+        UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        while True:
+            UDPClient.settimeout(5)
+            try:
+                UDPClient.sendto(bytes2send, serverAddress)
+                data, address = UDPClient.recvfrom(buffer)
+                line = data.decode('utf-8')
+                # print(line)
+                # if line == "Temp:":
+                #     continue
+                # elif line == "Acceleration":
+                #     continue
+                # else:
+                pos_count += 1
+                if (pos_count % 2) == 0:
+                    acc_values = [float(x) for x in line.split(',')]
+                    print(acc_values)
+                else:
+                    temp_values = [float(x) for x in line.split(',')]
+                    print(temp_values)
+            except socket.timeout:
+                print("Timeout Error")
+                break
+
+        # self.t1 = threading.Thread(target=self.live_dat, daemon=True)
+        # self.t2 = threading.Thread(target=self.readFile, daemon=True)
+        # self.t1.start()
+        # self.t2.start()
 
         self.publish5()
 
-    def readFile(self):
-        rows = []
-        while self.threading:
-            with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
-                data_csv = csv.reader(csv_file_test)
-                self.timepassed = time.time()
-                self.current_time = self.timepassed - self.start_time
-                for line in data_csv:
-                    # self.ax.
-                    rows.append(line)
-                    self.rows = rows[-1]
-                    self.ax.scatter(self.rows,self.rows)
-                    self.canvas.draw()
-                    #print(self.rows)
-
-                time.sleep(3)
+    # def readFile(self):
+    #     rows = []
+    #     while self.threading:
+    #         with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
+    #             data_csv = csv.reader(csv_file_test)
+    #             self.timepassed = time.time()
+    #             self.current_time = self.timepassed - self.start_time
+    #             for line in data_csv:
+    #                 # self.ax.
+    #                 rows.append(line)
+    #                 self.rows = rows[-1]
+    #                 self.ax.scatter(self.rows,self.rows)
+    #                 self.canvas.draw()
+    #                 #print(self.rows)
+    #
+    #             time.sleep(3)
 
 
     def publish5(self):
@@ -233,32 +263,36 @@ class DataProcessing:
         self.canvas.get_tk_widget().grid()
 
 
-    def live_dat(self):
-        self.threading = True
-        pos_count = 0
-        msgfCli = 'Client'
-        bytes2send = msgfCli.encode('utf-8')
-        serverAddress = ('172.20.10.7', 2224)
-        buffer = 1024
-        UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        while True:
-            UDPClient.sendto(bytes2send, serverAddress)
-            data, address = UDPClient.recvfrom(buffer)
-            line = data.decode('utf-8')
-            # print(line)
-
-            # if line == "Temp:":
-            #     continue
-            # elif line == "Acceleration":
-            #     continue
-            # else:
-            pos_count += 1
-            if (pos_count % 2) == 0:
-                acc_values = [float(x) for x in line.split(',')]
-                print(acc_values)
-            else:
-                temp_values = [float(x) for x in line.split(',')]
-                print(temp_values)
+    # def live_dat(self):
+        # self.threading = True
+        # pos_count = 0
+        # msgfCli = 'Client'
+        # bytes2send = msgfCli.encode('utf-8')
+        # serverAddress = ('172.20.10.7', 2224)
+        # buffer = 2048
+        # UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # while True:
+        #     UDPClient.settimeout(5)
+        #     try:
+        #         UDPClient.sendto(bytes2send, serverAddress)
+        #         data, address = UDPClient.recvfrom(buffer)
+        #         line = data.decode('utf-8')
+        #         # print(line)
+        #         # if line == "Temp:":
+        #         #     continue
+        #         # elif line == "Acceleration":
+        #         #     continue
+        #         # else:
+        #         pos_count += 1
+        #         if (pos_count % 2) == 0:
+        #             acc_values = [float(x) for x in line.split(',')]
+        #             print(acc_values)
+        #         else:
+        #             temp_values = [float(x) for x in line.split(',')]
+        #             print(temp_values)
+        #     except socket.timeout:
+        #         print("Timeout Error")
+        #         break
 
 
         # self.threading = True
