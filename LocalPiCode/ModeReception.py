@@ -66,27 +66,28 @@ def senDat():
     acc_values = []
     temp_values = []
     pos_count = 0
+    buffSize = 2048
+    ServerPort = 2224
+    ServerIP = '172.20.10.7'
     
-    try:
-        while True:
+    PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
+    PSock.bind((ServerIP,ServerPort))
+    
+#     try:
+    while True:
+        # Receiving data
+        if ser.in_waiting > 0: # returns the number of bytes recieved
+            line = ser.readline().decode('utf-8').rstrip()
+            print(line)
+            
+            bytesSending = line.encode('utf-8')
 
-            # Receiving data
-            if ser.in_waiting > 0: # returns the number of bytes recieved
-                line = ser.readline().decode('utf-8').rstrip()
-                print(line)
-                
-                buffSize = 2000
-                ServerPort = 2224
-                ServerIP = '172.20.10.7'
-                bytesSending = line.encode('utf-8')
-                PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
-                PSock.bind((ServerIP,ServerPort))
-                message,address = PSock.recvfrom(buffSize) # waiting unit Pi connects with client
-                PSock.sendto(bytesSending,address)
+            message,address = PSock.recvfrom(buffSize) # waiting unit Pi connects with client
+            PSock.sendto(bytesSending,address)
 
-    except KeyboardInterrupt: # ctrl c to stop
-        print("Close Serial Communication")
-        ser.close()
+#     except KeyboardInterrupt: # ctrl c to stop
+#         print("Close Serial Communication")
+#         ser.close()
         
 func1 = threading.Thread(target=cliSer, daemon=True)
 func2 = threading.Thread(target=senDat, daemon=True)
@@ -104,6 +105,4 @@ func2.start()
 # message,address = PSock.recvfrom(buffSize) # waiting unit Pi connects with client
 # message = message.decode('utf-8')
 # PSock.sendto(bytesSending,address)
-
-
 
