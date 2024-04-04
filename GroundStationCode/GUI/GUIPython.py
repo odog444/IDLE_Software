@@ -203,31 +203,29 @@ class DataProcessing:
         self.figs = []
         self.current_time = []
 
-        # self.t1 = threading.Thread(target=self.live_dat, daemon=True)
-        # self.t2 = threading.Thread(target=self.readFile, daemon=True)
-        # self.t1.start()
-        # self.t2.start()
-
-        self.live_dat()
+        self.t1 = threading.Thread(target=self.live_dat, daemon=True)
+        self.t2 = threading.Thread(target=self.readFile, daemon=True)
+        self.t1.start()
+        self.t2.start()
 
         self.publish5()
 
-    # def readFile(self):
-    #     rows = []
-    #     while self.threading:
-    #         with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
-    #             data_csv = csv.reader(csv_file_test)
-    #             self.timepassed = time.time()
-    #             self.current_time = self.timepassed - self.start_time
-    #             for line in data_csv:
-    #                 # self.ax.
-    #                 rows.append(line)
-    #                 self.rows = rows[-1]
-    #                 self.ax.scatter(self.rows,self.rows)
-    #                 self.canvas.draw()
-    #                 #print(self.rows)
-    #
-    #             time.sleep(3)
+    def readFile(self):
+        rows = []
+        while self.threading:
+            with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
+                data_csv = csv.reader(csv_file_test)
+                self.timepassed = time.time()
+                self.current_time = self.timepassed - self.start_time
+                for line in data_csv:
+                    # self.ax.
+                    rows.append(line)
+                    self.rows = rows[-1]
+                    self.ax.scatter(self.rows,self.rows)
+                    self.canvas.draw()
+                    #print(self.rows)
+
+                time.sleep(3)
 
 
     def publish5(self):
