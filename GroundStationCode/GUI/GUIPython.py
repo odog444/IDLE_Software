@@ -236,29 +236,29 @@ class DataProcessing:
     def live_dat(self):
         self.threading = True
         pos_count = 0
+        msgfCli = 'Client'
+        bytes2send = msgfCli.encode('utf-8')
+        serverAddress = ('172.20.10.7', 2224)
+        buffer = 1024
+        UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         while True:
-            msgfCli = 'Client'
-            bytes2send = msgfCli.encode('utf-8')
-            serverAddress = ('172.20.10.7', 2224)
-            buffer = 2000
-            UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             UDPClient.sendto(bytes2send, serverAddress)
             data, address = UDPClient.recvfrom(buffer)
             line = data.decode('utf-8')
             # print(line)
 
-            if line == "Temp:":
-                continue
-            elif line == "Acceleration":
-                continue
+            # if line == "Temp:":
+            #     continue
+            # elif line == "Acceleration":
+            #     continue
+            # else:
+            pos_count += 1
+            if (pos_count % 2) == 0:
+                acc_values = [float(x) for x in line.split(',')]
+                print(acc_values)
             else:
-                pos_count += 1
-                if (pos_count % 2) == 0:
-                    acc_values = [float(x) for x in line.split(',')]
-                    print(acc_values)
-                else:
-                    temp_values = [float(x) for x in line.split(',')]
-                    print(temp_values)
+                temp_values = [float(x) for x in line.split(',')]
+                print(temp_values)
 
 
         # self.threading = True
