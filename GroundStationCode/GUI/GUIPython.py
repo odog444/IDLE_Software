@@ -22,7 +22,8 @@ pause = True
 startNow = time.time()
 ElapsedTime = 0
 timerup = 900
-# test 2
+
+
 
 # Client/server setup:
 serverAddress = ('172.20.10.7', 2222)
@@ -234,29 +235,56 @@ class DataProcessing:
 
     def live_dat(self):
         self.threading = True
-        acc_axes = ["X", "Y", "Z"]
-        with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
-            write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-            write_file.writeheader()
+        pos_count = 0
         while self.threading:
-            try:
-                # time_current = time.time()
-                # self.time_passed = time_current - start_time
-                fake_data = Faker()
-                self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
-                # self.print_dat = float(self.DATA_FAKE[0])
-                with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
-                    write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-                    dat = {
-                        "X": self.DATA_FAKE[0],
-                        "Y": self.DATA_FAKE[1],
-                        "Z": self.DATA_FAKE[2]
-                    }
-                    write_file.writerow(dat)
-                time.sleep(3)
+            msgfCli = 'Client'
+            bytes2send = msgfCli.encode('utf-8')
+            serverAddress = ('172.20.10.7', 2224)
+            buffer = 320
+            UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            UDPClient.sendto(bytes2send, serverAddress)
+            data, address = UDPClient.recvfrom(buffer)
+            line = data.decode('utf-8')
+            # print(line)
 
-            except:
-                pass
+            if line == "Temp:":
+                continue
+            elif line == "Acceleration":
+                continue
+            else:
+                pos_count += 1
+                if (pos_count % 2) == 0:
+                    acc_values = [float(x) for x in line.split(',')]
+                    print(acc_values)
+                else:
+                    temp_values = [float(x) for x in line.split(',')]
+                    print(temp_values)
+
+
+        # self.threading = True
+        # acc_axes = ["X", "Y", "Z"]
+        # with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
+        #     write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+        #     write_file.writeheader()
+        # while self.threading:
+        #     try:
+        #         # time_current = time.time()
+        #         # self.time_passed = time_current - start_time
+        #         fake_data = Faker()
+        #         self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
+        #         # self.print_dat = float(self.DATA_FAKE[0])
+        #         with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
+        #             write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+        #             dat = {
+        #                 "X": self.DATA_FAKE[0],
+        #                 "Y": self.DATA_FAKE[1],
+        #                 "Z": self.DATA_FAKE[2]
+        #             }
+        #             write_file.writerow(dat)
+        #         time.sleep(3)
+        #
+        #     except:
+        #         pass
 
 class SlideMotor():
     def __init__(self, root, buffer, UDPClient, serverAddress):
@@ -269,7 +297,7 @@ class SlideMotor():
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
-        self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0,tickinterval=10, resolution=1, command=self.motorspeed)
+        self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
         self.motor.pack()
    
         self.publish6()
@@ -295,11 +323,14 @@ class SlideMotor():
         else:
             range = "full forward"
 
-        self.UDPClient.sendto(delay_converted, self.serverAddress)
+        #self.UDPClient.sendto(delay_converted, self.serverAddress)
+        delay_converted = str(delay_converted)
+        self.delay_converted = delay_converted.encode('utf-8')
+        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
         
         self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         self.frame8.config(text = "Motor range = " + range, font=("Helvectica", 10), fg= "white", bg = "black")
-        v_str_val = str(v)   # Is this what goes to the Pi?
+        v_str_val = str(v)   
         v_str = ('Motor Speed: ' + v_str_val)
         self.commandmotorspeed = v_str
         self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
@@ -313,38 +344,39 @@ class SlideMotor():
         self.motor.grid()
 
 
-class SlideLA():
+class ButtonsLA():
     def __init__(self, root, buffer, UDPClient, serverAddress):
         self.root = root
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.commandmotorspeed = '---'
-        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+        self.commandLinearActuator = '---'
+        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        self.frame10 = Label(root, text = "Current Linear Actuator Position = 0 cm", padx=5, pady=5, fg= "white", bg="black")
-        self.LA = Scale(self.frame9, from_=10, to=-10, orient=VERTICAL, length=400, showvalue=0,tickinterval=1, resolution=1, command=self.actuator)
-        self.LA.pack()
-   
+        self.upButton = Button(self.frame9, text="UP", repeatdelay = 100, repeatinterval= 100, bg="grey", width=10,height=10, command=self.up)
+        self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 100, repeatinterval= 100, bg="grey", width=10,height=10, command=self.down)
+
         self.publish7()
 
     
-    def actuator(self,v):
-        self.frame10.config(text = "Current Linear Actuator Position = " + v + " cm", font=("Helvectica", 10), fg= "white", bg = "black")
-        v_str_val = str(v)
-        v_str = ('Actuator Extension: ' + v_str_val)
-        self.commandmotorspeed = v_str
-        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
-        self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
+    def up(self):  
+        self.commandLinearActuator = 'UP'
+        #print(self.commandLinearActuator)
+        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+            
         
-        # Send command to arduino to move linear actuator
-    
+    def down(self):
+        self.commandLinearActuator = 'DOWN'
+        #print(self.commandLinearActuator)
+        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+
 
     def publish7(self):
         self.frame9.grid(row=3, column=3, sticky=N)
-        self.frame10.grid(row=3, column=4, sticky=N)
-        self.LA.grid()
-
+        self.upButton.grid(row=4, column=3, sticky=N)
+        self.downButton.grid(row=4, column=4, sticky=N)
 
 
 def UpdateElapsedTime():
@@ -359,4 +391,4 @@ if __name__ == "__main__":
     BUTTONS()
     RUNNING_TIMER()
     SlideMotor()
-    SlideLA()
+    ButtonsLA()

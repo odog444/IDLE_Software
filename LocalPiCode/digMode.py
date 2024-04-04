@@ -6,6 +6,8 @@ import sleepMode
 ElapsedTime = 0 # Placeholder
 timerEnd = 15  # 15 minutes/900 seconds
 
+
+
 def DigMode():
     # initial health check
     if(commonFunctions.systemCheck()): 
@@ -28,8 +30,12 @@ def dig():
     # continuously check sensors and dig timer
     while ElapsedTime <= timerEnd:
         delay_converted = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-        commonFunctions.moveDrum(delay_converted)
+        commonFunctions.moveDrum(int(delay_converted))
 
+        # Add Linear Actuator comms
+
+
+        
         if(not commonFunctions.systemCheck()):
             commonFunctions.enterSafeMode()
 
