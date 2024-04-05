@@ -79,15 +79,27 @@ def moveDrum(delay_converted):
     pi_pwm.start(0)
     pi_pwm.ChangeDutyCycle(delay_converted/10)
 
-def moveLinearActuator(Direction):
-    pass
-    if Direction == 'UP':
-        pass
+def moveLinearActuator(actuatorDirection):
+    pi_LinAct = GPIO.PWM(32,1000)
+    pi_LinAct.start(0)
+    # GPIO.setmode(GPIO.BOARD)
+    # GPIO.setup(8, GPIO.OUT)
+    
+    if actuatorDirection == 'UP':
+        pi_LinAct.ChangeDutyCycle(100)
+        print('UP')
+        # Set pin to HIGH
+        ##GPIO.output(8, GPIO.HIGH)          
 
-    elif Direction == 'DOWN':
-        pass
+    elif actuatorDirection == 'DOWN':
+        pi_LinAct.ChangeDutyCycle(50)
+        print('DOWN')
+        # Set pin to LOW
+        ##GPIO.output(8, GPIO.LOW) 
+
     else:
-        pass
+        pi_LinAct.ChangeDutyCycle(0)
+
 
 
 def receiveInput():

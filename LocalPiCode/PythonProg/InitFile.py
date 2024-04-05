@@ -63,4 +63,11 @@ GPIO.setup(LinPWMPin, GPIO.OUT) # Linear Actuator control
 GPIO.setup(DrumPWMPin, GPIO.OUT) # Drum motor control
 
 
+# GPIO.setup(8, GPIO.OUT)
+# GPIO.setup(7, GPIO.OUT)
+# GPIO.setup(6, GPIO.IN)
+
+
+
+
 # Run main.py file

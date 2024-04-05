@@ -201,7 +201,7 @@ class DataProcessing:
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
         # self.rows = []
         # self.figs = []
-        self.current_time = []
+        # self.current_time = []
 
         self.threading = True
         pos_count = 0
@@ -212,6 +212,8 @@ class DataProcessing:
         UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         while True:
             UDPClient.settimeout(5)
+            time.sleep(0.)
+
             try:
                 UDPClient.sendto(bytes2send, serverAddress)
                 data, address = UDPClient.recvfrom(buffer)
@@ -229,6 +231,7 @@ class DataProcessing:
                 else:
                     temp_values = [float(x) for x in line.split(',')]
                     print(temp_values)
+
             except socket.timeout:
                 print("Timeout Error")
                 break

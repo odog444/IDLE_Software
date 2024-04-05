@@ -33,6 +33,8 @@ def dig():
         commonFunctions.moveDrum(int(delay_converted))
 
         # Add Linear Actuator comms
+        actuatorDirection = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        commonFunctions.moveLinearActuator(actuatorDirection)
 
 
         
