@@ -24,14 +24,6 @@ ElapsedTime = 0
 timerup = 900
 
 
-
-# Client/server setup:
-serverAddress = ('172.20.10.7', 2222)
-buffer = 1024
-UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-
-
 class RootGUI:
     def __init__(self):
         self.root = Tk()  # initialising root
@@ -193,9 +185,12 @@ class RUNNING_TIMER():
     
 
 class DataProcessing:
-    def __init__(self, root):
+    def __init__(self, root, buffer, UDPClient, serverAddress):
         self.start_time = time.time()
         self.root = root
+        self.buffer = buffer
+        self.UDPClient = UDPClient
+        self.serverAddress = serverAddress
         self.fig, self.ax = plt.subplots()
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
@@ -207,9 +202,6 @@ class DataProcessing:
         pos_count = 0
         msgfCli = 'Client'
         bytes2send = msgfCli.encode('utf-8')
-        serverAddress = ('172.20.10.7', 2224)
-        buffer = 2048
-        UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         while True:
             UDPClient.settimeout(5)
             time.sleep(0.)
@@ -387,25 +379,45 @@ class ButtonsLA():
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.commandLinearActuator = '---'
+        self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        self.upButton = Button(self.frame9, text="UP", repeatdelay = 100, repeatinterval= 100, bg="grey", width=10,height=10, command=self.up)
-        self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 100, repeatinterval= 100, bg="grey", width=10,height=10, command=self.down)
+        #self.upButton = Button(self.frame9, text="UP", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10, command=self.up)
+        #self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10, command=self.down)
+        
+        #CHANGES START HERE:
+        #self.upButton = Button(self.frame9, text="UP", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10)# command=self.up)
+        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)# , command=self.up)
+        self.upButton.bind('<Button-1>', self.up)
+        self.upButton.bind('<ButtonRelease-1>', self.stop)
+        #self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10)# command=self.down)
+        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)#, command=self.down)
+        self.downButton.bind('<Button-1>', self.down)
+        self.downButton.bind('<ButtonRelease-1>', self.stop)
+        # time.sleep(0.1)
 
         self.publish7()
-
+        #self.commandLinearActuator = 'No Command\n'
     
-    def up(self):  
-        self.commandLinearActuator = 'UP'
-        #print(self.commandLinearActuator)
+    def up(self,x):  
+        self.commandLinearActuator = 'UP\n'
+        print(self.commandLinearActuator)
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        #self.upButton.after(1000,self.up(x))
             
         
-    def down(self):
-        self.commandLinearActuator = 'DOWN'
-        #print(self.commandLinearActuator)
+    def down(self,x):
+        self.commandLinearActuator = 'DOWN\n'
+        print(self.commandLinearActuator)
+        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        #self.downButton.after(1000,self.down(x))
+
+    # AND HERE:
+    def stop(self,x):
+        self.commandLinearActuator = 'NONE\n'
+        print(self.commandLinearActuator)
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
 
