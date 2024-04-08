@@ -23,6 +23,9 @@ startNow = time.time()
 ElapsedTime = 0
 timerup = 900
 
+# initializing variables for motor
+v = 0 
+
 
 class RootGUI:
     def __init__(self):
@@ -204,7 +207,7 @@ class DataProcessing:
         bytes2send = msgfCli.encode('utf-8')
         while True:
             UDPClient.settimeout(5)
-            time.sleep(0.)
+            #time.sleep(0.)
 
             try:
                 UDPClient.sendto(bytes2send, serverAddress)
@@ -327,11 +330,18 @@ class SlideMotor():
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
         self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
+        # CHANGES MADE STARTING HERE:
+        # self.motor.bind("<Button-1>", self.sendnone)
+        # self.motor.bind("<ButtonRelease-1>", self.sendmotorspeed)
+
+
         self.motor.pack()
    
         self.publish6()
 
-    def motorspeed(self, v):
+    def motorspeed(self,v):
+    #def motorspeed(self):
+       # global v
         self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
         
         min = 500       #calculating microsecond delay displayed on GUI
@@ -339,6 +349,7 @@ class SlideMotor():
         
         throttle = float(v)
         delay = int((throttle + 100)*(max - min)/200 + 500)
+        #print("Motor delay: " + str(delay))
         delay_converted = int((throttle + 100)*5) # This value (between 0 and 1000) is sent to the Pi
 
         if delay <= min:
@@ -353,17 +364,30 @@ class SlideMotor():
             range = "full forward"
 
         #self.UDPClient.sendto(delay_converted, self.serverAddress)
-        delay_converted = str(delay_converted)
+        delay_converted = str(delay_converted) 
+        #print("Converted delay: " + delay_converted)
         self.delay_converted = delay_converted.encode('utf-8')
         self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-        
         self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         self.frame8.config(text = "Motor range = " + range, font=("Helvectica", 10), fg= "white", bg = "black")
-        v_str_val = str(v)   
-        v_str = ('Motor Speed: ' + v_str_val)
-        self.commandmotorspeed = v_str
-        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
-        self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
+    
+        
+    
+
+    # def sendnone(self,x):
+    #     self.commandmotorspeed = 'NONE\n'
+    #     self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+    #     self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
+    #     print(self.commandmotorspeed)
+
+
+    # def sendmotorspeed(self,x):
+    #      global v
+    #      v_str = str(v)   
+    #      self.commandmotorspeed = v_str
+    #      self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+    #      self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
+    #      print(self.commandmotorspeed)
     
 
     def publish6(self):
