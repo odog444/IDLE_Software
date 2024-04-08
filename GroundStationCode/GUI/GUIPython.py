@@ -23,7 +23,8 @@ startNow = time.time()
 ElapsedTime = 0
 timerup = 900
 
-# initializing variables for motor
+# "Locking" Dig Mode
+digLock = True #Dig Mode "Locked"
 
 
 class RootGUI:
@@ -61,20 +62,25 @@ class BUTTONS():
         self.SLEEP = Button(self.frame, text="SLEEP", bg="red", width=15, command=self.sleepcheck)
         self.STOP = Button(self.frame, text="STOP", bg="grey", width=15, command=self.stopcheck)
 
-        # self.OpenButton()
         self.publish2()
 
     def digcheck(self):
+
         self.DIG.configure(bg = "red")
         self.SAFE.configure(bg = "grey")
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "grey")
         print("Dig Pressed")
+        self.commanddig = "Dig Mode"
+        self.commanddig = self.commanddig.encode('utf-8')
         self.UDPClient.sendto(self.commanddig, self.serverAddress)
 
         global pause
         global startNow
-        global ElapsedTime             
+        global ElapsedTime
+        global digLock
+        digLock = False
+         
 
         if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
             ElapsedTime = 0
@@ -86,6 +92,7 @@ class BUTTONS():
         startNow = time.time()
         UpdateElapsedTime()
         RUNNING_TIMER
+  
 
     def safecheck(self):
         self.DIG.configure(bg = "grey")
@@ -93,8 +100,13 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "grey")
         print("Safe Pressed")
-        command = "Safe Mode"
+        self.commandsafe = "Safe Mode"
+        self.commandsafe = self.commandsafe.encode('utf-8')
         self.UDPClient.sendto(self.commandsafe, self.serverAddress)
+
+        global digLock
+
+        digLock = True
 
     def sleepcheck(self):
         self.DIG.configure(bg = "grey")
@@ -102,8 +114,13 @@ class BUTTONS():
         self.SLEEP.configure(bg = "red")
         self.STOP.configure(bg = "grey")
         print("Sleep Pressed")
-        command = "Sleep Mode"
+        self.commandsleep = "Sleep Mode"
+        self.commandsleep = self.commandsleep.encode('utf-8')
         self.UDPClient.sendto(self.commandsleep, self.serverAddress)
+
+        global digLock
+
+        digLock = True
 
     def stopcheck(self):
         self.DIG.configure(bg = "grey")
@@ -111,18 +128,26 @@ class BUTTONS():
         self.SLEEP.configure(bg = "grey")
         self.STOP.configure(bg = "red")
         print("Stop Pressed")
+        self.commandstop = "Stop Mode"
+        self.commandstop = self.commandstop.encode('utf-8')
         self.UDPClient.sendto(self.commandstop, self.serverAddress)
 
         global pause
+        global digLock
 
-        pause = True
-    
-        # Check elapsed time
-        if ElapsedTime < timerup:
-            UpdateElapsedTime()        
-            print("Dig Cycle paused. System is in Stop Mode") 
-        elif ElapsedTime >= timerup:
-            print("15-minute dig cycle has been completed. Retracting all systems.") 
+        digLock = True
+
+        if pause == False: 
+            pause = True
+            if ElapsedTime < timerup:
+                UpdateElapsedTime()        
+            elif ElapsedTime >= timerup:
+                pass
+        else: 
+            pass
+
+        # Power off the motor
+        #SlideMotor.motorspeed(SlideMotor.root,0)
 
     def publish2(self):
         self.frame.grid(row=0, column=0)
@@ -141,12 +166,13 @@ class RUNNING_TIMER():
         self.time_passed = Label(root, text="", font=("Helvectica", 37), fg= "white", bg="black")
         self.threading = FALSE
 
-    
+
         self.updatetime()
         self.publish3()
         
 
     def updatetime(self):
+
         global pause
         global ElapsedTime
         self.start_time2 = time.time()
@@ -178,7 +204,7 @@ class RUNNING_TIMER():
             sec = int((minsec - minsecmin)*60)
             self.time_passed.config(text = "{m:02d} : {s:02d}".format(m=min,s=sec), fg = "red", bg = "black")
             self.time_passed.after(100, self.updatetime)
-    
+
 
     def publish3(self):
         self.frame4.grid(row=1, column=1, sticky=N)
@@ -196,28 +222,18 @@ class DataProcessing:
         self.fig, self.ax = plt.subplots()
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
-        # self.rows = []
-        # self.figs = []
-        # self.current_time = []
-
         self.threading = True
         pos_count = 0
         msgfCli = 'Client'
         bytes2send = msgfCli.encode('utf-8')
         while True:
             UDPClient.settimeout(5)
-            #time.sleep(0.)
+            time.sleep(0.3)
 
             try:
                 UDPClient.sendto(bytes2send, serverAddress)
                 data, address = UDPClient.recvfrom(buffer)
                 line = data.decode('utf-8')
-                # print(line)
-                # if line == "Temp:":
-                #     continue
-                # elif line == "Acceleration":
-                #     continue
-                # else:
                 pos_count += 1
                 if (pos_count % 2) == 0:
                     acc_values = [float(x) for x in line.split(',')]
@@ -259,63 +275,63 @@ class DataProcessing:
         self.frame5.grid(row=3, column=0, sticky=NE)
         self.canvas.get_tk_widget().grid()
 
-
     # def live_dat(self):
-        # self.threading = True
-        # pos_count = 0
-        # msgfCli = 'Client'
-        # bytes2send = msgfCli.encode('utf-8')
-        # serverAddress = ('172.20.10.7', 2224)
-        # buffer = 2048
-        # UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # while True:
-        #     UDPClient.settimeout(5)
-        #     try:
-        #         UDPClient.sendto(bytes2send, serverAddress)
-        #         data, address = UDPClient.recvfrom(buffer)
-        #         line = data.decode('utf-8')
-        #         # print(line)
-        #         # if line == "Temp:":
-        #         #     continue
-        #         # elif line == "Acceleration":
-        #         #     continue
-        #         # else:
-        #         pos_count += 1
-        #         if (pos_count % 2) == 0:
-        #             acc_values = [float(x) for x in line.split(',')]
-        #             print(acc_values)
-        #         else:
-        #             temp_values = [float(x) for x in line.split(',')]
-        #             print(temp_values)
-        #     except socket.timeout:
-        #         print("Timeout Error")
-        #         break
+    #     self.threading = True
+    #     pos_count = 0
+    #     msgfCli = 'Client'
+    #     bytes2send = msgfCli.encode('utf-8')
+    #     serverAddress = ('172.20.10.7', 2224)
+    #     buffer = 2048
+    #     UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #     while True:
+    #         UDPClient.settimeout(5)
+    #         try:
+    #             UDPClient.sendto(bytes2send, serverAddress)
+    #             data, address = UDPClient.recvfrom(buffer)
+    #             line = data.decode('utf-8')
+    #             # print(line)
+    #             # if line == "Temp:":
+    #             #     continue
+    #             # elif line == "Acceleration":
+    #             #     continue
+    #             # else:
+    #             pos_count += 1
+    #             if (pos_count % 2) == 0:
+    #                 acc_values = [float(x) for x in line.split(',')]
+    #                 print(acc_values)
+    #             else:
+    #                 temp_values = [float(x) for x in line.split(',')]
+    #                 print(temp_values)
+    #         except socket.timeout:
+    #             print("Timeout Error")
+    #             break
 
 
-        # self.threading = True
-        # acc_axes = ["X", "Y", "Z"]
-        # with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
-        #     write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-        #     write_file.writeheader()
-        # while self.threading:
-        #     try:
-        #         # time_current = time.time()
-        #         # self.time_passed = time_current - start_time
-        #         fake_data = Faker()
-        #         self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
-        #         # self.print_dat = float(self.DATA_FAKE[0])
-        #         with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
-        #             write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-        #             dat = {
-        #                 "X": self.DATA_FAKE[0],
-        #                 "Y": self.DATA_FAKE[1],
-        #                 "Z": self.DATA_FAKE[2]
-        #             }
-        #             write_file.writerow(dat)
-        #         time.sleep(3)
-        #
-        #     except:
-        #         pass
+    #     self.threading = True
+    #     acc_axes = ["X", "Y", "Z"]
+    #     with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
+    #         write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+    #         write_file.writeheader()
+    #     while self.threading:
+    #         try:
+    #             # time_current = time.time()
+    #             # self.time_passed = time_current - start_time
+    #             fake_data = Faker()
+    #             self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
+    #             # self.print_dat = float(self.DATA_FAKE[0])
+    #             with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
+    #                 write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
+    #                 dat = {
+    #                     "X": self.DATA_FAKE[0],
+    #                     "Y": self.DATA_FAKE[1],
+    #                     "Z": self.DATA_FAKE[2]
+    #                 }
+    #                 write_file.writerow(dat)
+    #             time.sleep(3)
+        
+    #         except:
+    #             pass
+
 
 class SlideMotor():
     def __init__(self, root, buffer, UDPClient, serverAddress):
@@ -327,60 +343,59 @@ class SlideMotor():
         self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
-        
-        # CHANGES STARTING HERE: 
         self.frame8 = LabelFrame(root, text="Enter an Integer between -100 and 100", padx=50, pady=20, bg="black", fg= "white")
         self.textbox = Entry(self.frame8, width=50, fg="grey", bg="white")
         self.textbox.pack()
         self.textbox.bind("<Return>", self.callmotorspeed)
-
-        # STOP HERE
         self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
         self.motor.pack()
    
         self.publish6()
+
     
     def callmotorspeed(self,x):
-        v = self.textbox.get()
-        try: 
-            if int(v) > 100 or int(v) < -100:
-                self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
-            else: 
-                self.frame8.config(text="Enter an Integer between -100 and 100", fg= "white")
-                self.motor.set(v)
-                self.motorspeed(v)
-        except:
-            self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
+        if digLock == False:
+            v = self.textbox.get()
+            try: 
+                if int(v) > 100 or int(v) < -100:
+                    self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
+                else: 
+                    self.frame8.config(text="Enter an Integer between -100 and 100", fg= "white")
+                    self.motor.set(v)
+                    self.motorspeed(v)
+            except:
+                self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
+        else:
+            pass
 
     def motorspeed(self,v):
-        self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
-        
-        min = 500       #calculating microsecond delay displayed on GUI
-        max = 2500      
-        
-        throttle = float(v)
-        delay = int((throttle + 100)*(max - min)/200 + 500)
-        #print("Motor delay: " + str(delay))
-        delay_converted = int((throttle + 100)*5) # This value (between 0 and 1000) is sent to the Pi
+        if digLock == False:
+            self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
+            
+            min = 500     
+            max = 2500      
+            
+            throttle = float(v)
+            delay = int((throttle + 100)*(max - min)/200 + 500)
+            delay_converted = int((throttle + 100)*5)
 
-        if delay <= min:
-            range = "full reverse"
-        elif min < delay < 1490:
-            range = "prop. reverse"
-        elif 1490 <= delay <= 1510:
-            range = "neutral"
-        elif 1510 < delay < 2500:
-            range = "prop. forward"
+            if delay <= min:
+                range = "full reverse"
+            elif min < delay < 1490:
+                range = "prop. reverse"
+            elif 1490 <= delay <= 1510:
+                range = "neutral"
+            elif 1510 < delay < 2500:
+                range = "prop. forward"
+            else:
+                range = "full forward"
+
+            delay_converted = str(delay_converted) 
+            self.delay_converted = delay_converted.encode('utf-8')
+            self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+            self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         else:
-            range = "full forward"
-
-        #self.UDPClient.sendto(delay_converted, self.serverAddress)
-        delay_converted = str(delay_converted) 
-        #print("Converted delay: " + delay_converted)
-        self.delay_converted = delay_converted.encode('utf-8')
-        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-        self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
-    
+            pass
 
     def publish6(self):
         self.frame6.grid(row=2, column=4, sticky=N)
@@ -398,8 +413,6 @@ class ButtonsLA():
         self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-       
-        #CHANGES START HERE:
         self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
         self.upButton.bind('<Button-1>', self.up)
         self.upButton.bind('<ButtonRelease-1>', self.stop)
@@ -409,25 +422,32 @@ class ButtonsLA():
 
         self.publish7()
     
-    def up(self,x):  
-        self.commandLinearActuator = 'UP\n'
-        print(self.commandLinearActuator)
-        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-           
+    def up(self,x): 
+        if digLock == False: 
+            self.commandLinearActuator = 'UP\n'
+            print(self.commandLinearActuator)
+            self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+            self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        else: 
+            pass 
         
     def down(self,x):
-        self.commandLinearActuator = 'DOWN\n'
-        print(self.commandLinearActuator)
-        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        if digLock == False:
+            self.commandLinearActuator = 'DOWN\n'
+            print(self.commandLinearActuator)
+            self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+            self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        else: 
+            pass
         
     def stop(self,x):
-        self.commandLinearActuator = 'NONE\n'
-        print(self.commandLinearActuator)
-        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-
+        if digLock == False:
+            self.commandLinearActuator = 'NONE\n'
+            print(self.commandLinearActuator)
+            self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+            self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        else:
+            pass
 
     def publish7(self):
         self.frame9.grid(row=3, column=3, sticky=N)
@@ -438,8 +458,6 @@ class ButtonsLA():
 def UpdateElapsedTime():
     global ElapsedTime
     ElapsedTime = int(time.time() - startNow + ElapsedTime)
-    
-
 
 
 if __name__ == "__main__":
@@ -448,3 +466,4 @@ if __name__ == "__main__":
     RUNNING_TIMER()
     SlideMotor()
     ButtonsLA()
+    
