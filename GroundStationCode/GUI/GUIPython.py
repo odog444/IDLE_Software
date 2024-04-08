@@ -24,7 +24,6 @@ ElapsedTime = 0
 timerup = 900
 
 # initializing variables for motor
-v = 0 
 
 
 class RootGUI:
@@ -328,20 +327,32 @@ class SlideMotor():
         self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
-        self.frame8 = Label(root, text = "Motor range = ---", padx=15, pady=15, fg= "white", bg="black")
+        
+        # CHANGES STARTING HERE: 
+        self.frame8 = LabelFrame(root, text="Enter an Integer between -100 and 100", padx=50, pady=20, bg="black", fg= "white")
+        self.textbox = Entry(self.frame8, width=50, fg="grey", bg="white")
+        self.textbox.pack()
+        self.textbox.bind("<Return>", self.callmotorspeed)
+
+        # STOP HERE
         self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
-        # CHANGES MADE STARTING HERE:
-        # self.motor.bind("<Button-1>", self.sendnone)
-        # self.motor.bind("<ButtonRelease-1>", self.sendmotorspeed)
-
-
         self.motor.pack()
    
         self.publish6()
+    
+    def callmotorspeed(self,x):
+        v = self.textbox.get()
+        try: 
+            if int(v) > 100 or int(v) < -100:
+                self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
+            else: 
+                self.frame8.config(text="Enter an Integer between -100 and 100", fg= "white")
+                self.motor.set(v)
+                self.motorspeed(v)
+        except:
+            self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
 
     def motorspeed(self,v):
-    #def motorspeed(self):
-       # global v
         self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
         
         min = 500       #calculating microsecond delay displayed on GUI
@@ -369,25 +380,6 @@ class SlideMotor():
         self.delay_converted = delay_converted.encode('utf-8')
         self.UDPClient.sendto(self.delay_converted, self.serverAddress)
         self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
-        self.frame8.config(text = "Motor range = " + range, font=("Helvectica", 10), fg= "white", bg = "black")
-    
-        
-    
-
-    # def sendnone(self,x):
-    #     self.commandmotorspeed = 'NONE\n'
-    #     self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
-    #     self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
-    #     print(self.commandmotorspeed)
-
-
-    # def sendmotorspeed(self,x):
-    #      global v
-    #      v_str = str(v)   
-    #      self.commandmotorspeed = v_str
-    #      self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
-    #      self.UDPClient.sendto(self.commandmotorspeed, self.serverAddress)
-    #      print(self.commandmotorspeed)
     
 
     def publish6(self):
@@ -406,39 +398,30 @@ class ButtonsLA():
         self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        #self.upButton = Button(self.frame9, text="UP", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10, command=self.up)
-        #self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10, command=self.down)
-        
+       
         #CHANGES START HERE:
-        #self.upButton = Button(self.frame9, text="UP", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10)# command=self.up)
-        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)# , command=self.up)
+        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
         self.upButton.bind('<Button-1>', self.up)
         self.upButton.bind('<ButtonRelease-1>', self.stop)
-        #self.downButton = Button(self.frame9, text="DOWN", repeatdelay = 1, repeatinterval= 1, bg="grey", width=10,height=10)# command=self.down)
-        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)#, command=self.down)
+        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
         self.downButton.bind('<Button-1>', self.down)
         self.downButton.bind('<ButtonRelease-1>', self.stop)
-        # time.sleep(0.1)
 
         self.publish7()
-        #self.commandLinearActuator = 'No Command\n'
     
     def up(self,x):  
         self.commandLinearActuator = 'UP\n'
         print(self.commandLinearActuator)
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        #self.upButton.after(1000,self.up(x))
-            
+           
         
     def down(self,x):
         self.commandLinearActuator = 'DOWN\n'
         print(self.commandLinearActuator)
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        #self.downButton.after(1000,self.down(x))
-
-    # AND HERE:
+        
     def stop(self,x):
         self.commandLinearActuator = 'NONE\n'
         print(self.commandLinearActuator)
