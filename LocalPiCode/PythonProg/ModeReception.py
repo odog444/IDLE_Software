@@ -14,6 +14,7 @@ import serial
 import serial.tools.list_ports
 import csv
 import threading
+import socket
 from threading import Thread
 
 print('Server is working and listening...')
@@ -26,19 +27,20 @@ ser.flushInput()
 ser.setDTR(True)
 
 buffer = 2048
-ServerPort = 2222
+ServerPort = 2244
 ServerIP = '172.20.10.7'
 PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
 PSock.bind((ServerIP,ServerPort))
 ser.reset_input_buffer()
+
+global command
 
 def cliSer():
     print("Communicating with GS ")
     while True:
         command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client (laptop)
         command = command.decode('utf-8')
-        print(f"Command from GS: {command}")
-        print('Client Address: ', address[0])
+        PSock.sendto(command.encode('utf-8'),address)
         time.sleep(0.1)
         
 def senDat():
@@ -52,9 +54,6 @@ def senDat():
                 ser.reset_input_buffer()
             line = ser.readline().decode('utf-8').rstrip()
             print(f"From serial: {line}")
-
-            message,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client
-            PSock.sendto(command.encode('utf-8'),address)
 
 
 func1 = threading.Thread(target=cliSer, daemon=True)
