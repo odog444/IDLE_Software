@@ -20,7 +20,12 @@ from threading import Thread
 print('Server is working and listening...')
 
 #Initialize
-ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
+try:
+    ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
+except:
+    ser = serial.Serial('/dev/ttyACM1',115200, timeout = 1.0)
+
+    
 ser.setDTR(False)
 time.sleep(1)
 ser.flushInput()
@@ -39,9 +44,14 @@ def cliSer():
     print("Communicating with GS ")
     while True:
         command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client (laptop)
-        command = command.decode('utf-8')
-        PSock.sendto(command.encode('utf-8'),address)
-        time.sleep(0.1)
+        command = command.decode('utf-8') + '\n'
+        try:
+            ser.write(command.encode('utf-8'))
+        except Exception as error:
+            print(f"Serial write failed with exception {error}")
+        print(command)
+        time.sleep(0.01)
+        
         
 def senDat():
     print("Serial is working!")
@@ -54,6 +64,7 @@ def senDat():
                 ser.reset_input_buffer()
             line = ser.readline().decode('utf-8').rstrip()
             print(f"From serial: {line}")
+        time.sleep(0.01)
 
 
 func1 = threading.Thread(target=cliSer, daemon=True)
