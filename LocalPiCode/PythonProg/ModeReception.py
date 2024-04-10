@@ -49,7 +49,7 @@ def cliSer():
             ser.write(command.encode('utf-8'))
         except Exception as error:
             print(f"Serial write failed with exception {error}")
-        print(command)
+        #print(command)
         time.sleep(0.01)
         
         
@@ -64,7 +64,7 @@ def senDat():
                 ser.reset_input_buffer()
             line = ser.readline().decode('utf-8').rstrip()
             print(f"From serial: {line}")
-        time.sleep(0.01)
+        time.sleep(0.1)
 
 
 func1 = threading.Thread(target=cliSer, daemon=True)
