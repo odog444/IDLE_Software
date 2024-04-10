@@ -38,7 +38,7 @@ class dataInterchange:
 
 
     def senDat(self):
-        ser = serial.Serial('/dev/ttyACMO' ,9600, timeout = 1.0) #
+        ser = serial.Serial('/dev/ttyACMO', 9600, timeout = 1.0) #
         ser.setDTR(False)
         ser.flushInput()
         ser.setDTR(True)

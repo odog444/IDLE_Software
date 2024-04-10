@@ -61,20 +61,25 @@ def checkSensors():
     # If any of the readings are abnormal, return as false. Otherwise, return as true.
     return True
 
-def stopDrum():
-    print("Drum stopped") # Placeholder for stopping drum
-    pi_pwm = GPIO.PWM(33,1000)
-    pi_pwm.start(0)
-    pi_pwm.ChangeDutyCycle(50)
+def stopDrum(): # Is this code right??
+    # pi_pwm = GPIO.PWM(33,1000)
+    # pi_pwm.start(0)
+    # pi_pwm.ChangeDutyCycle(50)
+    pass
+    # use Pi code
 
-def startDrum():
-    print("Drum Started") # Placeholder for starting drum spin
+# def startDrum():
+#     print("Drum Started") # Placeholder for starting drum spin
 
-def lowerDrum():
-    print("Drum Lowered") # Placeholder for lowering drum 
+# def lowerDrum():
+#     print("Drum Lowered") # Placeholder for lowering drum 
 
 def raiseDrum():
-    print("Drum Raised") # Placeholder for raising drum
+    # use Pi code
+
+
+    #print("Drum Raised") # Placeholder for raising drum
+    pass
 
 def moveDrum(delay_converted):
     # Send out of 5v GPIO
@@ -82,28 +87,14 @@ def moveDrum(delay_converted):
     pi_pwm.start(0)
     pi_pwm.ChangeDutyCycle(delay_converted/10)
 
-def moveLinearActuator(actuatorDirection):
+    # Use Pi code
     pass
-    #pi_LinAct = GPIO.PWM(32,1000)
-    #pi_LinAct.start(0)
-    # GPIO.setmode(GPIO.BOARD)
-    # GPIO.setup(3, GPIO.OUT)
+
+def moveLinearActuator(actuatorDirection):
+    # Insert Pi code 
     
-    if actuatorDirection == 'UP':
-        #pi_LinAct.ChangeDutyCycle(100)
-        print('UP')
-        # Set pin to HIGH
-        #GPIO.output(3, GPIO.HIGH)       
-
-    elif actuatorDirection == 'DOWN':
-        #pi_LinAct.ChangeDutyCycle(50)
-        print('DOWN')
-        # Set pin to LOW
-        #GPIO.output(3, GPIO.LOW) 
-
-    else:
-        #pi_LinAct.ChangeDutyCycle(0)
-        pass
+    pass
+ 
 
 
 
@@ -116,7 +107,7 @@ def receiveInput():
             sleepMode.SleepMode()
         case "Stop Mode":
             print("Stop Mode entered.")
-            stopMode.StopMode() # add timer
+            stopMode.StopMode() 
         case "Dig Mode":
             print("Dig Mode entered.")
             digMode.DigMode()
