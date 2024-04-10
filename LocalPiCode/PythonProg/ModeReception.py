@@ -8,7 +8,6 @@ import time
 import os
 import shutil
 import subprocess
-import RPi.GPIO as GPIO
 import random
 from git import Repo
 import serial
@@ -36,23 +35,7 @@ def cliSer():
             print('Client Address: ', address[0])
             #time.sleep(0.01) #recieving data
             time.sleep(1) # sending data 
-
-# 
-# class CustThread(Thread):
-#     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
-#         Thread.__init__(self, group, target, name, args, kwargs)
-#         self._returnVal = None
-#         
-#     def run(self):
-#         if self._target is not None:
-#             self._returnVal = self._target(*self._args, **self._kwargs)
-#             
-#     def join(self):
-#         Thread.join(self)
-#         return self._returnVal
         
-
-
 def senDat():
     
     ser = serial.Serial('/dev/ttyACM0',9600, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
@@ -73,10 +56,12 @@ def senDat():
     PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
     PSock.bind((ServerIP,ServerPort))
     
-#     try:
     while True:
         # Receiving data
         if ser.in_waiting > 0: # returns the number of bytes recieved
+            if(ser.in_waiting > buffSize):
+                print("BUFFER OVERFLOW, resetting...")
+                ser.reset_input_buffer
             line = ser.readline().decode('utf-8').rstrip()
             print(line)
             
@@ -85,13 +70,10 @@ def senDat():
             message,address = PSock.recvfrom(buffSize) # waiting unit Pi connects with client
             PSock.sendto(bytesSending,address)
 
-#     except KeyboardInterrupt: # ctrl c to stop
-#         print("Close Serial Communication")
-#         ser.close()
-        
+
 func1 = threading.Thread(target=cliSer, daemon=True)
 func2 = threading.Thread(target=senDat, daemon=True)
-# func2 = CustThread(target=senDat)
+
 
 func1.start()
 func2.start()
@@ -106,3 +88,5 @@ func2.start()
 # message = message.decode('utf-8')
 # PSock.sendto(bytesSending,address)
 
+# while(True):
+#     command()
