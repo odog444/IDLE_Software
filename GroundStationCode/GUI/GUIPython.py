@@ -131,6 +131,13 @@ class BUTTONS():
 
         digLock = True
 
+        #Check whether drum is spinning (send throttle value)
+        self.ismotoron = str(motorThrottle)
+        #print(self.ismotoron)
+        self.ismotoron = self.ismotoron.encode('utf-8')
+        self.UDPClient.sendto(self.ismotoron, self.serverAddress)
+
+
     def stopcheck(self):
         self.DIG.configure(bg = "grey")
         self.SAFE.configure(bg = "grey")
@@ -149,7 +156,7 @@ class BUTTONS():
         if pause == False: 
             pause = True
             if ElapsedTime < timerup:
-                UpdateElapsedTime()        
+                UpdateElapsedTime()    
             elif ElapsedTime >= timerup:
                 pass
             #print(ElapsedTime)
@@ -202,6 +209,26 @@ class RUNNING_TIMER():
         else:
             pass
         
+
+    def starttimer(self):
+        if digLock == False:
+            global pause
+            global startNow
+
+            if pause == True:
+                pause = False
+                startNow = time.time()
+                UpdateElapsedTime()
+            else:
+                pause = True
+                if ElapsedTime < timerup:
+                    UpdateElapsedTime()        
+                elif ElapsedTime >= timerup:
+                    pass
+
+        else:
+            pass
+
 
     def updatetime(self):
 
@@ -256,6 +283,7 @@ class DataProcessing:
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
         self.threading = True
+    
         # pos_count = 0
         # msgfCli = 'Client'
         # bytes2send = msgfCli.encode('utf-8')
@@ -279,8 +307,7 @@ class DataProcessing:
         #         print("Timeout Error")
         #         break
 
-
-        self.t1 = threading.Thread(target=self.live_dat, daemon=True)
+        self.t1 = threading.Thread(target = self.live_dat, daemon = True)
         self.t1.start()
 
         self.publish5()
@@ -380,6 +407,7 @@ class SlideMotor():
                 self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
         else:
             pass
+        
 
     def motorspeed(self,v):
         global motorThrottle
@@ -411,6 +439,7 @@ class SlideMotor():
             self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         else:
             pass
+        
 
     def publish6(self):
         self.frame6.grid(row=2, column=4, sticky=N)
@@ -458,7 +487,7 @@ class ButtonsLA():
     def stop(self,x):
         if digLock == False:
             self.commandLinearActuator = 'NONE\n'
-            print(self.commandLinearActuator)
+            #print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else:
@@ -481,4 +510,3 @@ if __name__ == "__main__":
     RUNNING_TIMER()
     SlideMotor()
     ButtonsLA()
-    
