@@ -299,38 +299,16 @@ class DataProcessing:
                 if (pos_count % 2) == 0:
                     acc_values = [float(x) for x in line.split(',')]
                     print(acc_values)
+                    # self.ax.scatter(pos_count, acc_values[1])
+                    # self.canvas.draw()
                 else:
                     temp_values = [float(x) for x in line.split(',')]
                     print(temp_values)
+                    self.ax.scatter(pos_count, temp_values[0])
+                    self.canvas.draw()
             except socket.timeout:
                 print("Timeout Error")
                 break
-
-
-    #     self.threading = True
-    #     acc_axes = ["X", "Y", "Z"]
-    #     with open('DATA_FAKE_YIKES.csv', 'w') as csv_file:
-    #         write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-    #         write_file.writeheader()
-    #     while self.threading:
-    #         try:
-    #             # time_current = time.time()
-    #             # self.time_passed = time_current - start_time
-    #             fake_data = Faker()
-    #             self.DATA_FAKE = [int(fake_data.latitude()), int(fake_data.latitude()), int(fake_data.latitude())]
-    #             # self.print_dat = float(self.DATA_FAKE[0])
-    #             with open('DATA_FAKE_YIKES2.csv', 'a') as csv_file:
-    #                 write_file = csv.DictWriter(csv_file, fieldnames=acc_axes)
-    #                 dat = {
-    #                     "X": self.DATA_FAKE[0],
-    #                     "Y": self.DATA_FAKE[1],
-    #                     "Z": self.DATA_FAKE[2]
-    #                 }
-    #                 write_file.writerow(dat)
-    #             time.sleep(3)
-        
-    #         except:
-    #             pass
 
 
 class SlideMotor():
