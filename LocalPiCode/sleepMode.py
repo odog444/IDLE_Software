@@ -14,11 +14,10 @@ def SleepMode():
 
 def Sleep():
     
-
-    diggerMotorOn = True # Placeholder
     # check whether drum is spinning
-    if(diggerMotorOn == True):
-
+    diggerMotorOn = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+    diggerMotorOn = int(diggerMotorOn)
+    if(diggerMotorOn != 0):
         # turn off drum
         commonFunctions.stopDrum()
 

@@ -63,6 +63,9 @@ def checkSensors():
 
 def stopDrum():
     print("Drum stopped") # Placeholder for stopping drum
+    pi_pwm = GPIO.PWM(33,1000)
+    pi_pwm.start(0)
+    pi_pwm.ChangeDutyCycle(50)
 
 def startDrum():
     print("Drum Started") # Placeholder for starting drum spin

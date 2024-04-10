@@ -2,8 +2,8 @@
 import commonFunctions
 import sleepMode
 
-ElapsedTime = 0 # Placeholder
-timerEnd = 15 # 15 minutes/900 seconds
+#ElapsedTime = 0 # Placeholder
+timerEnd = 900 # 15 minutes/900 seconds
 
 def StopMode(): 
 
@@ -11,6 +11,8 @@ def StopMode():
     commonFunctions.stopDrum()
 
     # Checking elapsed dig time
+    ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+    ElapsedTime = int(ElapsedTime)
     # Check elapsed time
     if ElapsedTime < timerEnd:      
         print("Dig Cycle paused. System is in Stop Mode") 
