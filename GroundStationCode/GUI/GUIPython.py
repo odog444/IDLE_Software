@@ -26,6 +26,9 @@ timerup = 900
 # "Locking" Dig Mode
 digLock = True #Dig Mode "Locked"
 
+# Initializing throttle value (used in Sleep Mode)
+motorThrottle = 0
+
 
 class RootGUI:
     def __init__(self):
@@ -88,10 +91,10 @@ class BUTTONS():
         else:
             pass
 
-        pause = False
-        startNow = time.time()
-        UpdateElapsedTime()
-        RUNNING_TIMER
+        # pause = False
+        # startNow = time.time()
+        # UpdateElapsedTime()
+        # RUNNING_TIMER
   
 
     def safecheck(self):
@@ -107,6 +110,12 @@ class BUTTONS():
         global digLock
 
         digLock = True
+
+        #Check whether drum is spinning (send throttle value)
+        self.ismotoron = str(motorThrottle)
+        #print(self.ismotoron)
+        self.ismotoron = self.ismotoron.encode('utf-8')
+        self.UDPClient.sendto(self.ismotoron, self.serverAddress)
 
     def sleepcheck(self):
         self.DIG.configure(bg = "grey")
@@ -143,6 +152,9 @@ class BUTTONS():
                 UpdateElapsedTime()        
             elif ElapsedTime >= timerup:
                 pass
+            #print(ElapsedTime)
+            self.timeElapsed = str(ElapsedTime)
+            self.timeElapsed = self.timeElapsed.encode('utf-8')  
         else: 
             pass
 
@@ -163,12 +175,32 @@ class RUNNING_TIMER():
         self.start_time = time.time()
         self.root = root
         self.frame4 = LabelFrame(root, text="Live Time", padx=25, pady=25, fg= "white", bg="black")
+        self.frame10 = Button(root,text = "Start Timer", padx=25, pady=25, fg= "black", bg="grey", command=self.starttimer)
         self.time_passed = Label(root, text="", font=("Helvectica", 37), fg= "white", bg="black")
         self.threading = FALSE
 
 
         self.updatetime()
         self.publish3()
+
+    def starttimer(self):
+        if digLock == False:
+            global pause
+            global startNow
+
+            if pause == True:
+                pause = False
+                startNow = time.time()
+                UpdateElapsedTime()
+            else:
+                pause = True
+                if ElapsedTime < timerup:
+                    UpdateElapsedTime()        
+                elif ElapsedTime >= timerup:
+                    pass
+
+        else:
+            pass
         
 
     def updatetime(self):
@@ -208,6 +240,7 @@ class RUNNING_TIMER():
 
     def publish3(self):
         self.frame4.grid(row=1, column=1, sticky=N)
+        self.frame10.grid(row=1, column=2, sticky=N)
         self.time_passed.grid()
 
     
@@ -332,8 +365,10 @@ class SlideMotor():
 
     
     def callmotorspeed(self,x):
+        global motorThrottle
         if digLock == False:
             v = self.textbox.get()
+            motorThrottle = v
             try: 
                 if int(v) > 100 or int(v) < -100:
                     self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
@@ -347,7 +382,9 @@ class SlideMotor():
             pass
 
     def motorspeed(self,v):
+        global motorThrottle
         if digLock == False:
+            motorThrottle = v
             self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
             
             min = 500     
@@ -391,10 +428,10 @@ class ButtonsLA():
         self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
+        self.upButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
         self.upButton.bind('<Button-1>', self.up)
         self.upButton.bind('<ButtonRelease-1>', self.stop)
-        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
+        self.downButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
         self.downButton.bind('<Button-1>', self.down)
         self.downButton.bind('<ButtonRelease-1>', self.stop)
 
@@ -403,7 +440,7 @@ class ButtonsLA():
     def up(self,x): 
         if digLock == False: 
             self.commandLinearActuator = 'UP\n'
-            print(self.commandLinearActuator)
+            #print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
@@ -412,7 +449,7 @@ class ButtonsLA():
     def down(self,x):
         if digLock == False:
             self.commandLinearActuator = 'DOWN\n'
-            print(self.commandLinearActuator)
+            #print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
