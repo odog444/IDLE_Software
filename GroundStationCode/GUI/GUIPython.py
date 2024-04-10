@@ -457,10 +457,10 @@ class ButtonsLA():
         self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        self.upButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
+        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
         self.upButton.bind('<Button-1>', self.up)
         self.upButton.bind('<ButtonRelease-1>', self.stop)
-        self.downButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
+        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
         self.downButton.bind('<Button-1>', self.down)
         self.downButton.bind('<ButtonRelease-1>', self.stop)
 
