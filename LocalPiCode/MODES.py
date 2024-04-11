@@ -159,21 +159,16 @@ class COMMONFUNCS:
         # If any of the readings are abnormal, return as false. Otherwise, return as true.
         return True
 
-    def stopDrum(self):  # Is this code right??
+    def stopDrum(self):  
         command = str(500) + '\n'
-        # Send command to Arduino?
+        # Send command to Arduino, where 500 gets converted to a 1500 usecond delay in the Arduino code 
     
 
     def raiseDrum(self):
         command = ('UP\n')
+        time.sleep(5)
+        command = ('NONE\n')
         # Send command to Arduino?
-        
-    
-    def moveDrum(self, delay_converted):
-        pass
-
-    def moveLinearActuator(self, actuatorDirection):
-        pass
 
 
     def receiveInput(self):
