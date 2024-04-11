@@ -1,6 +1,17 @@
 #include <Wire.h>
 int counter = 0;
 
+// Lin actuator pins
+const int pwmPin = 9;
+const int pin1 = 8;
+const int pin2 = 7;
+const int pin3 = 6;
+
+// Drum motor config
+const int drumPWMpin = 3;
+String message;
+float msDelay = 1500;
+
 // Addreses of each temp sensor (3) and accelerometer
 const int U1Temp = 0x48; // Temp sensor below accelerometer, middle right of board
 const int U3Temp = 0x4F; // Temp sensor at top left of board
@@ -42,50 +53,51 @@ float calcTemp(int sensorAddr){
   return cTemp;
 }
 
+void setIn(){ // For lin. act.
+    // Set logic to move the LA Out
+  digitalWrite(pwmPin, HIGH);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, HIGH);
+  digitalWrite(pin3, HIGH);
+}
+void setOut(){ // For lin. act.
+  // Set logic to move LA In
+  digitalWrite(pwmPin, HIGH);
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, HIGH);
+}
+
 void setup() 
 {
+  //********** Sensor setup **********//
   // Initialise I2C communication as MASTER
   Wire.begin();
   // Initialise Serial communication, set baud rate = 9600
-  Serial.begin(9600);
+  Serial.begin(115200);
   while(!Serial){}
 
-  // ****** Temperature sensor configuration ****** //
+  //  Temperature sensor configuration  //
   tempSensorConfig(U1Temp);
   tempSensorConfig(U3Temp);
   tempSensorConfig(U4Temp);
 
 
-  // ****** ADXL367Z Config ****** //
+  //  ADXL367Z Config  //
   // If address of ADXL happens to be different than defined, use that address
   byte error, address;
   int deviceCount = 0;
-
-  // Serial.println("Scanning...");
 
   for (address = 1; address < 127; address++) {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
 
     if (error == 0) {
-      // Print address it found
-      // Serial.print("Device found at address 0x");
-      if (address < 16) Serial.print("0");
-      // Serial.print(address, HEX);
-      // Serial.println();
       deviceCount++;
       // Check that the given address isn't one of the 3 temp sensors
       if(address != U1Temp && address != U3Temp && address != U4Temp){
          accelMeter = address;
-//        Serial.print("Non-Temp device found, Accel address is 0x");
-//        Serial.println(address, HEX);
-        // Serial.print(", and for reading, has become 0x");
-        // Serial.println((address << 1) + 1, HEX);
       }
-    } else if (error == 4) {
-//      Serial.print("Unknown error at address 0x");
-      if (address < 16) Serial.print("0");
-//      Serial.println(address, HEX);
     }
   }
   
@@ -94,20 +106,13 @@ void setup()
   Wire.beginTransmission(accelMeter);
   Wire.write(0x2D); // Address for register
   Wire.requestFrom(accelMeter, 1);
-//  if (Wire.available() == 1) {
-//    POWER_CTL = Wire.read();
-//    Serial.print("Register value read is ");
-//    Serial.println(POWER_CTL, BIN);
-//  }else{
-//    Serial.println("Wire not available");
-//    Serial.println(Wire.available());
-//  }
+ if (Wire.available() == 1) {
+   POWER_CTL = Wire.read();
+ }
   Wire.endTransmission();
 
   // Logical Rshift twice and Lshift back to clear RHS 7 bits (so basically everything except for reserved bit), then + BIN 10 or DEC 2 for measurement mode as per datasheet
   POWER_CTL = (((unsigned int)POWER_CTL >> 7) << 7) + 2; // "unsigned int" to typecast POWER_CTL, which makes the Rshift to behave as logical rather than arithmetic
-//  Serial.print("Measurement Mode activated, new POWER_CTL value is ");
-//  Serial.println(POWER_CTL, BIN);
 
   // Write new POWER_CTL value to POWER_CTL register
   Wire.beginTransmission(accelMeter);
@@ -115,12 +120,22 @@ void setup()
   Wire.write(POWER_CTL);
   Wire.endTransmission();
 
+  //********** Motor control setup **********//
+  // Lin act.
+  pinMode(pwmPin, OUTPUT);
+  pinMode(pin1, OUTPUT);
+  pinMode(pin2, OUTPUT);
+  pinMode(pin3, OUTPUT);
+
+  // Drum motor
+  pinMode(drumPWMpin, OUTPUT);
+
   delay(300); 
 }
 
 void loop()
 {
-    
+  //********** Sensor code **********//
   // Convert temperature data
   float cTempU1 = calcTemp(U1Temp);
   float cTempU3 = calcTemp(U3Temp);
@@ -177,7 +192,7 @@ void loop()
 //  Serial.print("Acceleration data in XYZ: ");
   Serial.println("Acceleration");
   for(int i = 0; i < 3; i++){
-    Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
+    Serial.print(accelData[i]);
     if(i != 2){Serial.print(",");}
   }
   Serial.println();
@@ -199,7 +214,6 @@ void loop()
 //    Serial.println();
 //    Serial.println();
 //}
- delay(750);
 
 // Bidirectional communication:
 // Rx and Tx should both be blinking
@@ -209,6 +223,37 @@ void loop()
 //    counter++;
 //    Serial.println(message);
 //  }
+  //********** Motor control code **********//
+  if(Serial.available() > 0){
+    message = Serial.readStringUntil('\n');
+  }else{
+    message = "No command sent";
+  }
 
+  // Init variables for drum
+  int messageFloat = message.toInt();
 
+  if (message == "UP"){
+    setIn();
+  } else if (message == "DOWN"){
+    setOut();
+  }else if(messageFloat != 0){
+    if(message == "0"){
+      msDelay = 500;
+    }else{
+      msDelay = (messageFloat * 2) + 500;
+    }
+  }else{
+    digitalWrite(pwmPin, LOW);
+  }
+  delay(10);
+
+  // Drive drum motor
+  digitalWrite(3, HIGH);
+  /*
+  * 500 - 1490 useconds will turn motor in reverse
+  * 1510 - 2500 useconds will turn motor forward
+  */
+  delayMicroseconds(msDelay);
+  digitalWrite(3, LOW);
 }
