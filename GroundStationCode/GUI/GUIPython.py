@@ -87,14 +87,6 @@ class BUTTONS():
 
         if ElapsedTime >= timerup:  # If 1 cycle is already completed, this will restart Dig Mode
             ElapsedTime = 0
-
-        else:
-            pass
-
-        # pause = False
-        # startNow = time.time()
-        # UpdateElapsedTime()
-        # RUNNING_TIMER
   
 
     def safecheck(self):
@@ -108,14 +100,20 @@ class BUTTONS():
         self.UDPClient.sendto(self.commandsafe, self.serverAddress)
 
         global digLock
+        global pause
 
         digLock = True
 
-        #Check whether drum is spinning (send throttle value)
-        self.ismotoron = str(motorThrottle)
-        #print(self.ismotoron)
-        self.ismotoron = self.ismotoron.encode('utf-8')
-        self.UDPClient.sendto(self.ismotoron, self.serverAddress)
+        # Pause timer
+        if pause == False: 
+            pause = True
+            if ElapsedTime < timerup:
+                UpdateElapsedTime() 
+
+        # #Check whether drum is spinning (send throttle value)
+        # self.ismotoron = str(motorThrottle)
+        # self.ismotoron = self.ismotoron.encode('utf-8')
+        # self.UDPClient.sendto(self.ismotoron, self.serverAddress)
 
     def sleepcheck(self):
         self.DIG.configure(bg = "grey")
@@ -128,14 +126,19 @@ class BUTTONS():
         self.UDPClient.sendto(self.commandsleep, self.serverAddress)
 
         global digLock
+        global pause
 
         digLock = True
 
-        #Check whether drum is spinning (send throttle value)
-        self.ismotoron = str(motorThrottle)
-        #print(self.ismotoron)
-        self.ismotoron = self.ismotoron.encode('utf-8')
-        self.UDPClient.sendto(self.ismotoron, self.serverAddress)
+        # Pause timer
+        if pause == False: 
+            pause = True
+            if ElapsedTime < timerup:
+                UpdateElapsedTime() 
+
+        # self.ismotoron = str(motorThrottle)
+        # self.ismotoron = self.ismotoron.encode('utf-8')
+        # self.UDPClient.sendto(self.ismotoron, self.serverAddress)
 
 
     def stopcheck(self):
@@ -148,8 +151,8 @@ class BUTTONS():
         self.commandstop = self.commandstop.encode('utf-8')
         self.UDPClient.sendto(self.commandstop, self.serverAddress)
 
-        global pause
         global digLock
+        global pause
 
         digLock = True
 
@@ -157,16 +160,11 @@ class BUTTONS():
             pause = True
             if ElapsedTime < timerup:
                 UpdateElapsedTime()    
-            elif ElapsedTime >= timerup:
-                pass
-            #print(ElapsedTime)
-            self.timeElapsed = str(ElapsedTime)
-            self.timeElapsed = self.timeElapsed.encode('utf-8')  
-        else: 
-            pass
 
-        # Power off the motor
-        #SlideMotor.motorspeed(SlideMotor.root,0)
+        self.timeElapsed = str(ElapsedTime)
+        self.timeElapsed = self.timeElapsed.encode('utf-8') 
+        self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
+
 
     def publish2(self):
         self.frame.grid(row=0, column=0)
@@ -178,9 +176,11 @@ class BUTTONS():
 
 class RUNNING_TIMER():  
     
-    def __init__(self, root): 
+    def __init__(self, root, UDPClient, serverAddress): 
         self.start_time = time.time()
         self.root = root
+        self.UDPClient = UDPClient
+        self.serverAddress = serverAddress
         self.frame4 = LabelFrame(root, text="Live Time", padx=25, pady=25, fg= "white", bg="black")
         self.frame10 = Button(root,text = "Start Timer", padx=25, pady=25, fg= "black", bg="grey", command=self.starttimer)
         self.time_passed = Label(root, text="", font=("Helvectica", 37), fg= "white", bg="black")
@@ -190,25 +190,6 @@ class RUNNING_TIMER():
         self.updatetime()
         self.publish3()
 
-    def starttimer(self):
-        if digLock == False:
-            global pause
-            global startNow
-
-            if pause == True:
-                pause = False
-                startNow = time.time()
-                UpdateElapsedTime()
-            else:
-                pause = True
-                if ElapsedTime < timerup:
-                    UpdateElapsedTime()        
-                elif ElapsedTime >= timerup:
-                    pass
-
-        else:
-            pass
-        
 
     def starttimer(self):
         if digLock == False:
@@ -219,6 +200,10 @@ class RUNNING_TIMER():
                 pause = False
                 startNow = time.time()
                 UpdateElapsedTime()
+                # Sending Elapsed Time to Pi
+                self.timeElapsed = str(ElapsedTime)
+                self.timeElapsed = self.timeElapsed.encode('utf-8') 
+                self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
             else:
                 pause = True
                 if ElapsedTime < timerup:

@@ -15,10 +15,13 @@ def StopMode():
     ElapsedTime = int(ElapsedTime)
     # Check elapsed time
     if ElapsedTime < timerEnd:      
+        # Should this be sent to GS?
         print("Dig Cycle paused. System is in Stop Mode") 
     elif ElapsedTime >= timerEnd:
         print("15-minute dig cycle has been completed. Retracting all systems.") 
-        sleepMode.SleepMode()
-    
+        #sleepMode.SleepMode()
+
+
+
 
 

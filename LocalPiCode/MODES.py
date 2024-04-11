@@ -6,49 +6,54 @@ import csv
 import keyboard
 from multiprocessing import Process
 import time
+import serial
+import serial.tools.list_ports
 import numpy as np
 from faker import Faker
 import RPi.GPIO as GPIO
 
 
+timerEnd = 900     # 900s/15min
+
+
 class DIGCLASS:
     def __init__(self):
-        self.ElapsedTime = 0  # Placeholder
-        self.timerEnd = 15  # 15 minutes/900 seconds
+        pass
 
     def DigMode(self):
         # initial health check
-        if (commonFunctions.systemCheck()):
-            dig()
+        if (COMMONFUNCS.systemCheck()):
+            self.dig()
         else:
-            commonFunctions.enterSafeMode()
+            COMMONFUNCS.enterSafeMode()
 
         return
 
     def dig(self):
 
-        # # power on drum
-        # commonFunctions.startDrum()
+        # GUI sends motor control and linear actuator commands already...do those need to be implemented here?
 
-        # # lower drum
-        # commonFunctions.lowerDrum()
-
-        # start timer
+        # Pulling Elapsed time from GUI (sent in GUI code when Start Timer button is pressed)
+        self.ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        self.ElapsedTime = int(self.ElapsedTime)
+        self.startNow = time.time()
+        self.timer = 0 #starting at 0 seconds
 
         # continuously check sensors and dig timer
-        while self.ElapsedTime <= self.timerEnd:
-            delay_converted = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-            commonFunctions.moveDrum(int(delay_converted))
+        # Time will count from 0 to remaining time calculated by (15 minutes (900 seconds) - Elapsed Time)
+        while self.timer < (timerEnd-self.ElapsedTime):
+            
+            if (not COMMONFUNCS.systemCheck()):
+                COMMONFUNCS.enterSafeMode()
+        
+            self.timer = int(time.time() - self.startNow)
+        
 
-            # Add Linear Actuator comms
-            actuatorDirection = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-            commonFunctions.moveLinearActuator(actuatorDirection)
-
-            if (not commonFunctions.systemCheck()):
-                commonFunctions.enterSafeMode()
-
+            
+        # Send this to GS?
         print("Dig cycle complete. Entering sleep mode")
 
+        # Autonomously enters sleep mode when digging ends 
         sleepMode.SleepMode()
 
         return
@@ -56,78 +61,86 @@ class DIGCLASS:
 class SAFECLASS:
     def __init__(self):
         pass
-    def SafeMode(diggerMotorOn):
-        # check whether drum is spinning
-        if (diggerMotorOn == True):
-            # turn off drum
-            commonFunctions.stopDrum()
 
-        print("Safe Mode entered. System recovery required")
+        self.SafeMode()
+
+    def SafeMode():
+
+        # Safe can be commanded or autonomously entered...?
+
+
+        # turn off drum
+        COMMONFUNCS.stopDrum()
+
+        # Alert GS that system has entered safe mode and request system recovery 
+
+
 
 class SLEEPCLASS:
     def __init__(self):
         pass
 
-    def SleepMode(self):
-        if (commonFunctions.systemCheck()):
-            Sleep()
-        else:
-            commonFunctions.enterSafeMode()
+        self.SleepMode()
 
+    def SleepMode(self):
+        if (COMMONFUNCS.systemCheck()):
+            self.sleep()
+        else:
+            COMMONFUNCS.enterSafeMode()
             return
 
-    def Sleep(self):
+    def sleep(self):
 
-        # check whether drum is spinning
-        diggerMotorOn = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-        diggerMotorOn = int(diggerMotorOn)
-        if (diggerMotorOn != 0):
-            # turn off drum
-            commonFunctions.stopDrum()
+        # turn off drum
+        COMMONFUNCS.stopDrum()
 
         # raise drum
-        commonFunctions.raiseDrum()
+        COMMONFUNCS.raiseDrum()
 
-        print("IDLE will await further commands")
+        # Change this later to send message to GS 
+        print("System is in Sleep Mode. IDLE will await further commands")
 
         return
 
-    print("Sleep Mode Entered")
 
 
 class STOPCLASS:
     def __init__(self):
-        self.timerEnd = 900 # 15 minutes/900 seconds
+         # Receiving elapsed dig time (sent in GUI code when Stop is pressed)
+        self.ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        self.ElapsedTime = int(self.ElapsedTime)
 
-    # Stop drum
+        self.StopMode()
+
     def StopMode(self):
 
         # Stop drum
-        commonFunctions.stopDrum()
-
-        # Checking elapsed dig time
-        ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-        ElapsedTime = int(ElapsedTime)
+        COMMONFUNCS.stopDrum()
+        # Send command to Arduino?
+    
         # Check elapsed time
-        if ElapsedTime < timerEnd:
-            print("Dig Cycle paused. System is in Stop Mode")
-        elif ElapsedTime >= timerEnd:
+        if self.ElapsedTime < timerEnd:
+            # Should this message be sent to the GS?
+            print("Dig Cycle paused. System is in Stop Mode") 
+        elif self.ElapsedTime >= timerEnd:
+            # Should this message be sent to the GS?
             print("15-minute dig cycle has been completed. Retracting all systems.")
-            sleepMode.SleepMode()
+            SLEEPCLASS.SleepMode()
+
 
 class COMMONFUNCS:
     def __init__(self):
         pass
 
     def systemCheck(self):  # Check if all sensors have nominal readings and
-        if (not checkSensors()):
+        if (not self.checkSensors()):
             return False
 
         return True  # If none of the if statements run, everything is in working order
 
     def enterSafeMode(self):
         # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
-        safeMode.SafeMode()
+        SAFECLASS.SafeMode()
         return
 
     def checkSensors(self):
@@ -139,62 +152,46 @@ class COMMONFUNCS:
         return True
 
     def stopDrum(self):  # Is this code right??
-        # pi_pwm = GPIO.PWM(33,1000)
-        # pi_pwm.start(0)
-        # pi_pwm.ChangeDutyCycle(50)
-        pass
-        # use Pi code
-
-    # def startDrum():
-    #     print("Drum Started") # Placeholder for starting drum spin
-
-    # def lowerDrum():
-    #     print("Drum Lowered") # Placeholder for lowering drum
+        command = str(500) + '\n'
+        # Send command to Arduino?
+    
 
     def raiseDrum(self):
-        # use Pi code
-
-        # print("Drum Raised") # Placeholder for raising drum
-        pass
-
+        command = ('UP\n')
+        # Send command to Arduino?
+        
+    
     def moveDrum(self, delay_converted):
-        # Send out of 5v GPIO
-        pi_pwm = GPIO.PWM(33, 1000)
-        pi_pwm.start(0)
-        pi_pwm.ChangeDutyCycle(delay_converted / 10)
-
-        # Use Pi code
         pass
 
     def moveLinearActuator(self, actuatorDirection):
-        # Insert Pi code
-
         pass
 
+
     def receiveInput(self):
-        modeToEnter = UDPClient.recvfrom(buffer)[0].decode(
-            'utf-8')  # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
+        modeToEnter = UDPClient.recvfrom(buffer)[0].decode('utf-8')  
+        # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
 
         match modeToEnter:  # Note: Remember to change print statements to send over to GS as statements to be printed on a console
             case "Sleep Mode":
                 print("Sleep Mode entered.")
-                sleepMode.SleepMode()
+                SLEEPCLASS.SleepMode()
             case "Stop Mode":
                 print("Stop Mode entered.")
-                stopMode.StopMode()
+                STOPCLASS.StopMode()
             case "Dig Mode":
                 print("Dig Mode entered.")
-                digMode.DigMode()
+                DIGCLASS.DigMode()
             case "Safe Mode":
                 print("Safe Mode entered.")
-                safeMode.SafeMode()
+                SAFECLASS.SafeMode()
             case _:
                 print("Invalid input, please try from the follwing:\n \
                 Sleep Mode\n \
                 Stop Mode\n \
                 Dig Mode\n \
                 Safe Mode")
-                receiveInput()
+                self.receiveInput()
 
 
 

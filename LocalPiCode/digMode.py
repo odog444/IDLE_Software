@@ -20,22 +20,29 @@ class DIGCLASS:
 
     def dig(self):
 
-        # # power on drum
-        # commonFunctions.startDrum()
+        # input = UDPClient.recvfrom(buffer)[0].decode('utf-8')
 
-        # # lower drum
-        # commonFunctions.lowerDrum()
+        # if (input.startswith("Motor Throttle:")):
+        #     delay_converted = input
+        # elif(input.startswith("Elapsed Time:")):
 
-        # start timer
+        # Only need this if we are checking the time
+        # ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8') # Placeholder
+        # ElapsedTime = int(ElapsedTime)
+
 
         # continuously check sensors and dig timer
-        while self.ElapsedTime <= self.timerEnd:
-            delay_converted = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-            commonFunctions.moveDrum(int(delay_converted))
+        #while self.ElapsedTime <= self.timerEnd:
 
-            # Add Linear Actuator comms
-            actuatorDirection = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-            commonFunctions.moveLinearActuator(actuatorDirection)
+        delay_converted = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        commonFunctions.moveDrum(int(delay_converted))
+
+        # Add Linear Actuator comms
+        actuatorDirection = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        commonFunctions.moveLinearActuator(actuatorDirection)
+
+        while True:
+
 
 
 
@@ -44,9 +51,9 @@ class DIGCLASS:
 
 
 
-        print("Dig cycle complete. Entering sleep mode")
+       # print("Dig cycle complete. Entering sleep mode")
 
-        sleepMode.SleepMode()
+       #sleepMode.SleepMode()
 
 
         return

@@ -38,7 +38,7 @@ PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
 PSock.bind((ServerIP,ServerPort))
 ser.reset_input_buffer()
 
-global command
+# global command
 
 def cliSer():
     print("Communicating with GS ")

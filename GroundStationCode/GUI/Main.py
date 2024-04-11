@@ -9,7 +9,7 @@ UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 RootMaster = RootGUI()
 Button_Maker = BUTTONS(RootMaster.root, buffer, UDPClient, serverAddress)
-Time_Data = RUNNING_TIMER(RootMaster.root)
+Time_Data = RUNNING_TIMER(RootMaster.root, UDPClient, serverAddress)
 Data_Process = DataProcessing(RootMaster.root,buffer, UDPClient, serverAddress)
 Slide_Motor = SlideMotor(RootMaster.root, buffer, UDPClient, serverAddress)
 Buttons_LA = ButtonsLA(RootMaster.root, buffer, UDPClient, serverAddress)
