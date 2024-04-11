@@ -1,5 +1,4 @@
 import time
-import sleepMode
 import sys
 import socket
 import csv
@@ -10,22 +9,24 @@ import serial
 import serial.tools.list_ports
 import numpy as np
 from faker import Faker
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 
 timerEnd = 900     # 900s/15min
 
 
 class DIGCLASS:
-    def __init__(self):
-        pass
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.addy = serverAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
 
     def DigMode(self):
         # initial health check
-        if (COMMONFUNCS.systemCheck()):
+        if (COMMONFUNCS.systemCheck(self)):
             self.dig()
         else:
-            COMMONFUNCS.enterSafeMode()
+            COMMONFUNCS.enterSafeMode(self)
 
         return
 
@@ -44,7 +45,7 @@ class DIGCLASS:
         while self.timer < (timerEnd-self.ElapsedTime):
             
             if (not COMMONFUNCS.systemCheck()):
-                COMMONFUNCS.enterSafeMode()
+                COMMONFUNCS.enterSafeMode(self)
         
             self.timer = int(time.time() - self.startNow)
         
@@ -54,48 +55,50 @@ class DIGCLASS:
         print("Dig cycle complete. Entering sleep mode")
 
         # Autonomously enters sleep mode when digging ends 
-        sleepMode.SleepMode()
+        sleepMode.SleepMode(self)
 
         return
 
 class SAFECLASS:
-    def __init__(self):
-        pass
-
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.addy = serverAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
         self.SafeMode()
 
-    def SafeMode():
+    def SafeMode(self):
 
         # Safe can be commanded or autonomously entered...?
 
 
         # turn off drum
-        COMMONFUNCS.stopDrum()
+        COMMONFUNCS.stopDrum(self)
 
         # Alert GS that system has entered safe mode and request system recovery 
 
 
 
 class SLEEPCLASS:
-    def __init__(self):
-        pass
-
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.addy = serverAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
         self.SleepMode()
 
     def SleepMode(self):
-        if (COMMONFUNCS.systemCheck()):
+        if not False:  # if (COMMONFUNCS.systemCheck(self)):
             self.sleep()
-        else:
-            COMMONFUNCS.enterSafeMode()
-            return
+        # else:
+        #     COMMONFUNCS.enterSafeMode(self)
+        #     return
 
     def sleep(self):
 
         # turn off drum
-        COMMONFUNCS.stopDrum()
+        COMMONFUNCS.stopDrum(self)
 
         # raise drum
-        COMMONFUNCS.raiseDrum()
+        COMMONFUNCS.raiseDrum(self)
 
         # Change this later to send message to GS 
         print("System is in Sleep Mode. IDLE will await further commands")
@@ -105,32 +108,37 @@ class SLEEPCLASS:
 
 
 class STOPCLASS:
-    def __init__(self):
+    def __init__(self,serverAddress, buffer, UDPClient):
          # Receiving elapsed dig time (sent in GUI code when Stop is pressed)
-        self.ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
-        self.ElapsedTime = int(self.ElapsedTime)
+         self.addy = serverAddress
+         self.buff = buffer
+         self.UDPCli = UDPClient
+         #self.ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+         #self.ElapsedTime = int(self.ElapsedTime)
 
-        self.StopMode()
+         self.StopMode()
 
     def StopMode(self):
 
         # Stop drum
-        COMMONFUNCS.stopDrum()
+        COMMONFUNCS.stopDrum(self)
         # Send command to Arduino?
     
         # Check elapsed time
-        if self.ElapsedTime < timerEnd:
-            # Should this message be sent to the GS?
-            print("Dig Cycle paused. System is in Stop Mode") 
-        elif self.ElapsedTime >= timerEnd:
-            # Should this message be sent to the GS?
-            print("15-minute dig cycle has been completed. Retracting all systems.")
-            SLEEPCLASS.SleepMode()
+        # if self.ElapsedTime < timerEnd:
+        #     # Should this message be sent to the GS?
+        #     print("Dig Cycle paused. System is in Stop Mode")
+        # elif self.ElapsedTime >= timerEnd:
+        #     # Should this message be sent to the GS?
+        #     print("15-minute dig cycle has been completed. Retracting all systems.")
+        #     SLEEPCLASS.SleepMode()
 
 
 class COMMONFUNCS:
-    def __init__(self):
-        pass
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.addy = serverAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
 
     def systemCheck(self):  # Check if all sensors have nominal readings and
         if (not self.checkSensors()):
@@ -140,7 +148,7 @@ class COMMONFUNCS:
 
     def enterSafeMode(self):
         # Maybe needs to run some other stuff, but other than that, it just runs safeMode()
-        SAFECLASS.SafeMode()
+        SAFECLASS.SafeMode(self)
         return
 
     def checkSensors(self):
