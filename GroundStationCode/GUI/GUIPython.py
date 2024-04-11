@@ -264,7 +264,8 @@ class DataProcessing:
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = plt.subplots(2,2, figsize=(5, 4))
+        self.fig2, self.ax2 = plt.subplots()
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
         self.threading = True
@@ -344,8 +345,8 @@ class DataProcessing:
                 if (pos_count % 2) == 0:
                     acc_values = [float(x) for x in line.split(',')]
                     print(acc_values)
-                    # self.ax.scatter(pos_count, acc_values[1])
-                    # self.canvas.draw()
+                    self.ax.scatter(pos_count, acc_values[1])
+                    self.canvas.draw()
                 else:
                     temp_values = [float(x) for x in line.split(',')]
                     print(temp_values)
