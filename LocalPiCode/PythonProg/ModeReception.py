@@ -43,7 +43,6 @@ ser.reset_input_buffer()
 def cliSer():
     print("Communicating with GS ")
     while True:
-        print("Currently talking with GS")
         command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client (laptop)
         command = command.decode('utf-8') + '\n'
         try:
@@ -58,7 +57,6 @@ def senDat():
     print("Serial is working!")
     
     while True:
-        print("Currently talking with Serial")
         # Receiving data
         if ser.in_waiting > 0: # returns the number of bytes recieved
             if(ser.in_waiting > buffer):
