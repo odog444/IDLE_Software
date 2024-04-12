@@ -26,9 +26,6 @@ timerup = 900
 # "Locking" Dig Mode
 digLock = True #Dig Mode "Locked"
 
-# Initializing throttle value (used in Sleep Mode)
-motorThrottle = 0
-
 
 class RootGUI:
     def __init__(self):
@@ -136,10 +133,6 @@ class BUTTONS():
             if ElapsedTime < timerup:
                 UpdateElapsedTime() 
 
-        # self.ismotoron = str(motorThrottle)
-        # self.ismotoron = self.ismotoron.encode('utf-8')
-        # self.UDPClient.sendto(self.ismotoron, self.serverAddress)
-
 
     def stopcheck(self):
         self.DIG.configure(bg = "grey")
@@ -155,6 +148,10 @@ class BUTTONS():
         global pause
 
         digLock = True
+
+        #SlideMotor.motor.set(0)
+        SlideMotor.motorspeed(SlideMotor,0)
+
 
         if pause == False: 
             pause = True
@@ -378,27 +375,24 @@ class SlideMotor():
 
     
     def callmotorspeed(self,x):
-        global motorThrottle
         if digLock == False:
             v = self.textbox.get()
-            motorThrottle = v
-            try: 
-                if int(v) > 100 or int(v) < -100:
-                    self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
-                else: 
-                    self.frame8.config(text="Enter an Integer between -100 and 100", fg= "white")
-                    self.motor.set(v)
-                    self.motorspeed(v)
-            except:
-                self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
         else:
-            pass
+            v = 0
+        try: 
+            if int(v) > 100 or int(v) < -100:
+                self.frame8.config(text = "WARNING: Entry is outside of bounds", fg="red")
+            else: 
+                self.frame8.config(text="Enter an Integer between -100 and 100", fg= "white")
+                self.motor.set(v)
+                self.motorspeed(v)
+        except:
+            self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
+    
         
 
     def motorspeed(self,v):
-        global motorThrottle
         if digLock == False:
-            motorThrottle = v
             self.frame6.config(text = "Motor Throttle (%) = " + v, fg= "white", bg = "black")
             
             min = 500     
@@ -408,23 +402,21 @@ class SlideMotor():
             delay = int((throttle + 100)*(max - min)/200 + 500)
             delay_converted = int((throttle + 100)*5)
 
-            if delay <= min:
-                range = "full reverse"
-            elif min < delay < 1490:
-                range = "prop. reverse"
-            elif 1490 <= delay <= 1510:
-                range = "neutral"
-            elif 1510 < delay < 2500:
-                range = "prop. forward"
-            else:
-                range = "full forward"
-
-            delay_converted = str(delay_converted) 
-            self.delay_converted = delay_converted.encode('utf-8')
-            self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-            self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
+        #     delay_converted = str(delay_converted) 
+        #     print("delay_converted = " + delay_converted)
+        #     self.delay_converted = delay_converted.encode('utf-8')
+        #     self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+        #     self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         else:
-            pass
+            delay = 1500
+            delay_converted = 500
+
+        delay_converted = str(delay_converted) 
+        print("delay_converted = " + delay_converted)
+        self.delay_converted = delay_converted.encode('utf-8')
+        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+        self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
+    
         
 
     def publish6(self):
@@ -455,7 +447,7 @@ class ButtonsLA():
     def up(self,x): 
         if digLock == False: 
             self.commandLinearActuator = 'UP\n'
-            #print(self.commandLinearActuator)
+            print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
@@ -464,7 +456,7 @@ class ButtonsLA():
     def down(self,x):
         if digLock == False:
             self.commandLinearActuator = 'DOWN\n'
-            #print(self.commandLinearActuator)
+            print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
@@ -473,7 +465,7 @@ class ButtonsLA():
     def stop(self,x):
         if digLock == False:
             self.commandLinearActuator = 'NONE\n'
-            #print(self.commandLinearActuator)
+            print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else:

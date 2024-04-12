@@ -197,32 +197,6 @@ void loop()
   }
   Serial.println();
  
-
-// Arduino sending data to Raspberry Pi:
-//// Tx should be blinking
-//  if (Serial.available()>0){
-////    String message = Serial.readStringUntil('\n');
-////    message = message + " " + String(counter);
-////    counter++;
-////    Serial.println(message);
-//    
-//      Serial.print("Acceleration data in XYZ: ");
-//      for(int i = 0; i < 3; i++){
-//        Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
-//        if(i != 2){Serial.print(", ");}
-//    }
-//    Serial.println();
-//    Serial.println();
-//}
-
-// Bidirectional communication:
-// Rx and Tx should both be blinking
-//  if (Serial.available()>0){
-//    String message = Serial.readStringUntil('\n');
-//    message = message + " " + String(counter);
-//    counter++;
-//    Serial.println(message);
-//  }
   //********** Motor control code **********//
   if(Serial.available() > 0){
     message = Serial.readStringUntil('\n');

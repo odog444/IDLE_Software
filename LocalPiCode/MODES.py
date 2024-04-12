@@ -7,10 +7,33 @@ from multiprocessing import Process
 import time
 import serial
 import serial.tools.list_ports
+import threading
 import numpy as np
 from faker import Faker
 # import RPi.GPIO as GPIO
 
+print('Server is working and listening...')
+
+#Initialize
+try:
+    ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
+except:
+    print("Could not connect to ttyACM0, trying ttyACM1...")
+    try:
+        ser = serial.Serial('/dev/ttyACM1',115200, timeout = 1.0)
+    except:
+        print("Cannot connect to serial, closing program...")
+        exit()
+
+
+    
+ser.setDTR(False)
+time.sleep(1)
+ser.flushInput()
+ser.setDTR(True)
+ser.reset_input_buffer()
+
+# global command
 
 timerEnd = 900     # 900s/15min
 
@@ -49,13 +72,12 @@ class DIGCLASS:
         
             self.timer = int(time.time() - self.startNow)
         
-
             
         # Send this to GS?
         print("Dig cycle complete. Entering sleep mode")
 
         # Autonomously enters sleep mode when digging ends 
-        sleepMode.SleepMode(self)
+        SLEEPCLASS.SleepMode(self)
 
         return
 
@@ -136,9 +158,18 @@ class STOPCLASS:
 
 class COMMONFUNCS:
     def __init__(self,serverAddress, buffer, UDPClient):
-        self.addy = serverAddress
+        self.ServerIP, self.ServerPort = serverAddress
+        #self.addy = serverAddress
         self.buff = buffer
         self.UDPCli = UDPClient
+        self.line = '1'
+        ser.setDTR(False)
+        time.sleep(1)
+        ser.flushInput()
+        ser.setDTR(True)
+        ser.reset._input_buffer()
+        print("Serial is working!")
+
 
     def systemCheck(self):  # Check if all sensors have nominal readings and
         if (not self.checkSensors()):
@@ -159,8 +190,10 @@ class COMMONFUNCS:
         # If any of the readings are abnormal, return as false. Otherwise, return as true.
         return True
 
-    def stopDrum(self):  
-        command = str(500) + '\n'
+    def stopDrum(self):
+        for i in range (10):  
+            command = str(500) + '\n'
+            time.sleep(0.05)
         # Send command to Arduino, where 500 gets converted to a 1500 usecond delay in the Arduino code 
     
 
@@ -172,23 +205,23 @@ class COMMONFUNCS:
 
 
     def receiveInput(self):
-        modeToEnter = UDPClient.recvfrom(buffer)[0].decode('utf-8')  
+        modeToEnter = self.UDPCli.recvfrom(self.buff)[0].decode('utf-8')  
         # recvfrom() returns 2 items, so [0] is to signify to only record 1st item. Hopefully should not cause bugs
 
-        match modeToEnter:  # Note: Remember to change print statements to send over to GS as statements to be printed on a console
-            case "Sleep Mode":
+        if modeToEnter == "Sleep Mode":
+            # Note: Remember to change print statements to send over to GS as statements to be printed on a console
                 print("Sleep Mode entered.")
                 SLEEPCLASS.SleepMode()
-            case "Stop Mode":
+        elif modeToEnter ==  "Stop Mode":
                 print("Stop Mode entered.")
                 STOPCLASS.StopMode()
-            case "Dig Mode":
+        elif modeToEnter == "Dig Mode":
                 print("Dig Mode entered.")
                 DIGCLASS.DigMode()
-            case "Safe Mode":
+        elif modeToEnter == "Safe Mode":
                 print("Safe Mode entered.")
                 SAFECLASS.SafeMode()
-            case _:
+        else:
                 print("Invalid input, please try from the follwing:\n \
                 Sleep Mode\n \
                 Stop Mode\n \
@@ -198,12 +231,100 @@ class COMMONFUNCS:
 
 
 
+
+class MODERECEPTION:
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.ServerIP, self.ServerPort = serverAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
+        self.ser = ser
+        
+        self.ser.setDTR(False)
+        time.sleep(1)
+        self.ser.flushInput()
+        self.ser.setDTR(True)
+
+        self.receiveComm = threading.Thread(target=self.cliSer, daemon=True)
+        self.sendComm = threading.Thread(target=self.senDat, daemon=True)
+
+        self.receiveComm.start()
+        self.sendComm.start()
+    
+    
+    def cliSer(self):
+        print("Communicating with GS ")
+        while True:
+            command = self.UDPCli.recvfrom(buff) # waiting unit Pi connects with client (laptop)
+            command = command.decode('utf-8') + '\n'
+            try:
+                self.ser.write(command.encode('utf-8'))
+            except Exception as error:
+                print(f"Serial write failed with exception {error}")
+            #print(command)
+            time.sleep(0.01)
+    
+
+    # Inserting ModeReception.py for consolidation:
+        
+    def senDat(self):
+        print("Serial is working!")
+
+        while True:
+            # Receiving data
+            if self.ser.in_waiting > 0: # returns the number of bytes recieved
+                if(self.ser.in_waiting > buffer):
+                    print("BUFFER OVERFLOW, resetting...")
+                    self.ser.reset_input_buffer()
+                line = self.ser.readline().decode('utf-8').rstrip()
+                print(f"From serial: {line}")
+            time.sleep(0.1)
+
+
+class SENSORDATA:
+    def __init__(self):
+        self.ServerIP, self.ServerPort = ServerAddress
+        self.buff = buffer
+        self.UDPCli = UDPClient
+        self.line = '1'
+        self.ser = ser
+
+        self.sensors = threading.Thread(target=self.sensorData, daemon=True)
+        self.sensors.start()
+
+
+
+    def sensorData(self):
+        self.ser.reset._input_buffer()
+        print("Serial is working!")
+
+        self.bytesSending = self.line.encode('utf-8')
+        print('Server is up and listening...')
+        self.message, self.address = self.UDPCli.recvfrom(self.buff) # waiting until Pi connects with client
+        self.message = self.message.decode('utf-8')
+
+        while not False:
+            # Receiving data
+            if self.ser.in_waiting > 0: # returns the number of bytes received
+                time.sleep(0.3)
+                if(self.ser.in_waiting > self.buff):
+                    print('BUFFER OVERFLOW')
+                    self.ser.reset_input_buffer()
+                else: 
+                    self.line = self.ser.readline().decode('utf-8').rstrip()
+                    print(self.line)
+                    self.bytesSending = self.line.encode('utf-8')
+                    self.UDPCli.sendto(self.bytesSending,self.address)
+
+
 if __name__ == "__main__":
+    MODERECEPTION()
+    SENSORDATA()
     DIGCLASS()
     SAFECLASS()
     SLEEPCLASS()
     STOPCLASS()
     COMMONFUNCS()
+
 
 
 
