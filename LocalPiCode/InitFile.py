@@ -28,9 +28,13 @@ try:
     repo = git.Repo('/home/idle/software/IDLE_software')
     repo.remotes.origin.pull()
     print("Done!")
-except:
+except Exception as errorMessage:
+    print("Error occured as:", errorMessage,", stashing changes and re-pulling")
+    repo.git.add('-A')
     repo.git.stash()
     repo.remotes.origin.pull()
+    print("Done!")
+    
 # Initialize GPIO pins on Pi
 '''
 NOTES ON PIN USAGE
