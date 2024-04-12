@@ -64,7 +64,10 @@ def senDat():
                 ser.reset_input_buffer()
             line = ser.readline().decode('utf-8').rstrip()
             print(f"From serial: {line}")
+        else: 
+            print("Nothing in buffer...")
         time.sleep(0.1)
+        
 
 
 func1 = threading.Thread(target=cliSer, daemon=True)
