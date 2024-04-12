@@ -10,7 +10,7 @@ import RPi.GPIO as GPIO
 import random
 import git
 from git import Repo
-#import MAIN_COMMON.py as mainFile
+
 
 
 # Function for checking if wifi is connected so that auto-run on boot will work:
@@ -66,3 +66,4 @@ Drum motor:
 
 # Run main.py file
 
+#import MAIN_COMMON.py as mainFile

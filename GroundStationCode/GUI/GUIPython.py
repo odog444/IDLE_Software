@@ -435,41 +435,48 @@ class ButtonsLA():
         self.commandLinearActuator = 'No Command\n'
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
-        self.upButton.bind('<Button-1>', self.up)
-        self.upButton.bind('<ButtonRelease-1>', self.stop)
-        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
-        self.downButton.bind('<Button-1>', self.down)
-        self.downButton.bind('<ButtonRelease-1>', self.stop)
+
+        self.upButton = Button(self.frame9, text="UP", bg="grey", repeatinterval=1, repeatdelay=1, width=10,height=10, command=self.up)
+        
+        # self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
+        # self.upButton.bind('<Button-1>', self.up)
+        # self.upButton.bind('<ButtonRelease-1>', self.stop)
+
+        self.downButton = Button(self.frame9, text="DOWN", bg="grey", repeatinterval=1, repeatdelay=1, width=10,height=10,command=self.down)
+        # self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
+        # self.downButton.bind('<Button-1>', self.down)
+        # self.downButton.bind('<ButtonRelease-1>', self.stop)
 
         self.publish7()
     
-    def up(self,x): 
-        if digLock == False: 
+    def up(self):
+    #def up(self,x): 
+        #if digLock == False: 
             self.commandLinearActuator = 'UP\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        else: 
-            pass 
+        #else: 
+        #    pass 
         
-    def down(self,x):
-        if digLock == False:
+    def down(self):
+    #def down(self,x):
+        #if digLock == False:
             self.commandLinearActuator = 'DOWN\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        else: 
-            pass
+        #else: 
+        #    pass
         
     def stop(self,x):
-        if digLock == False:
+        #if digLock == False:
             self.commandLinearActuator = 'NONE\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        else:
-            pass
+        # else:
+        #     pass
 
     def publish7(self):
         self.frame9.grid(row=3, column=3, sticky=N)
