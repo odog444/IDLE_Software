@@ -399,7 +399,7 @@ class SlideMotor():
             delay = int((throttle + 100)*(max - min)/200 + 500)
             delay_converted = int((throttle + 100)*5)
 
-            delay_converted = str(delay_converted) 
+            delay_converted = str(delay_converted) + '\n'
             #print("delay_converted = " + delay_converted)
             self.delay_converted = delay_converted.encode('utf-8')
             self.UDPClient.sendto(self.delay_converted, self.serverAddress)
@@ -435,42 +435,47 @@ class ButtonsLA():
         self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
 
-        self.upButton = Button(self.frame9, text="UP", bg="grey", repeatinterval=1, repeatdelay=1, width=10,height=10, command=self.up)
+        #self.upButton = Button(self.frame9, text="UP", bg="grey", repeatinterval=1, repeatdelay=1, width=10, height=10, command=self.up)
         
-        # self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
-        # self.upButton.bind('<Button-1>', self.up)
-        # self.upButton.bind('<ButtonRelease-1>', self.stop)
+        self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
+        self.upButton.bind('<Button-1>', self.up)
+        self.upButton.bind('<ButtonRelease-1>', self.stop)
 
-        self.downButton = Button(self.frame9, text="DOWN", bg="grey", repeatinterval=1, repeatdelay=1, width=10,height=10,command=self.down)
+        #self.downButton = Button(self.frame9, text="DOWN", bg="grey", repeatinterval=1, repeatdelay=1, width=10, height=10,command=self.down)
         
-        # self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
-        # self.downButton.bind('<Button-1>', self.down)
-        # self.downButton.bind('<ButtonRelease-1>', self.stop)
+        self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
+        self.downButton.bind('<Button-1>', self.down)
+        self.downButton.bind('<ButtonRelease-1>', self.stop)
 
         self.publish7()
+
     
-    def up(self):
-    #def up(self,x): 
+    #def up(self):
+    def up(self,x): 
         if digLock == False: 
-            self.commandLinearActuator = 'UP\n'
-            print(self.commandLinearActuator)
-            self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-            self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+            #while True:         # NEW LINE
+                self.commandLinearActuator = 'UP\n'
+                print(self.commandLinearActuator)
+                self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+                self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
             pass 
         
-    def down(self):
-    #def down(self,x):
+    #def down(self):
+    def down(self,x):
         if digLock == False:
-            self.commandLinearActuator = 'DOWN\n'
-            print(self.commandLinearActuator)
-            self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-            self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+            #while True:         # NEW LINE
+                self.commandLinearActuator = 'DOWN\n'
+                print(self.commandLinearActuator)
+                self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+                self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
             pass
-        
+
+    #def stop(self): 
     def stop(self,x):
         if digLock == False:
+        #    while True: 
             self.commandLinearActuator = 'NONE\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')

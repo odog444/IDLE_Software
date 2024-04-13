@@ -29,7 +29,7 @@ except:
     
 ser.setDTR(False)
 time.sleep(1)
-ser.flushInput()
+ser.flush_Input()
 ser.setDTR(True)
 ser.reset_input_buffer()
 
@@ -58,7 +58,7 @@ class DIGCLASS:
         # GUI sends motor control and linear actuator commands already...do those need to be implemented here?
 
         # Pulling Elapsed time from GUI (sent in GUI code when Start Timer button is pressed)
-        self.ElapsedTime = UDPClient.recvfrom(buffer)[0].decode('utf-8')
+        self.ElapsedTime = self.UDPCli.recvfrom(buffer)[0].decode('utf-8')
         self.ElapsedTime = int(self.ElapsedTime)
         self.startNow = time.time()
         self.timer = 0 #starting at 0 seconds
@@ -167,7 +167,7 @@ class COMMONFUNCS:
         time.sleep(1)
         ser.flushInput()
         ser.setDTR(True)
-        ser.reset._input_buffer()
+        ser.reset_input_buffer()
         print("Serial is working!")
 
 
@@ -272,7 +272,7 @@ class MODERECEPTION:
         while True:
             # Receiving data
             if self.ser.in_waiting > 0: # returns the number of bytes recieved
-                if(self.ser.in_waiting > buffer):
+                if(self.ser.in_waiting > self.buff):
                     print("BUFFER OVERFLOW, resetting...")
                     self.ser.reset_input_buffer()
                 line = self.ser.readline().decode('utf-8').rstrip()
@@ -294,7 +294,7 @@ class SENSORDATA:
 
 
     def sensorData(self):
-        self.ser.reset._input_buffer()
+        self.ser.reset_input_buffer()
         print("Serial is working!")
 
         self.bytesSending = self.line.encode('utf-8')
