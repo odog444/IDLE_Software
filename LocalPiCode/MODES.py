@@ -254,7 +254,7 @@ class MODERECEPTION:
     def cliSer(self):
         print("Communicating with GS ")
         while True:
-            command = self.UDPCli.recvfrom(buff) # waiting unit Pi connects with client (laptop)
+            command = self.UDPCli.recvfrom(self.buff) # waiting unit Pi connects with client (laptop)
             command = command.decode('utf-8') + '\n'
             try:
                 self.ser.write(command.encode('utf-8'))
@@ -281,8 +281,8 @@ class MODERECEPTION:
 
 
 class SENSORDATA:
-    def __init__(self):
-        self.ServerIP, self.ServerPort = ServerAddress
+    def __init__(self,serverAddress, buffer, UDPClient):
+        self.ServerIP, self.ServerPort = serverAddress
         self.buff = buffer
         self.UDPCli = UDPClient
         self.line = '1'

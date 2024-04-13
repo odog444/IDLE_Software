@@ -5,8 +5,8 @@ serverAddress = ('172.20.10.7', 2244)
 buffer = 2048
 UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-ModeReception = MODERECEPTION()
-SensorData = SENSORDATA()
+ModeReception = MODERECEPTION(serverAddress, buffer, UDPClient)
+SensorData = SENSORDATA(serverAddress, buffer, UDPClient)
 commonFunc = COMMONFUNCS(serverAddress, buffer, UDPClient)
 DIGMaster = DIGCLASS(serverAddress, buffer, UDPClient)
 SAFEMaster = SAFECLASS(serverAddress, buffer, UDPClient)

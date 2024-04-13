@@ -105,12 +105,7 @@ class BUTTONS():
         if pause == False: 
             pause = True
             if ElapsedTime < timerup:
-                UpdateElapsedTime() 
-
-        # #Check whether drum is spinning (send throttle value)
-        # self.ismotoron = str(motorThrottle)
-        # self.ismotoron = self.ismotoron.encode('utf-8')
-        # self.UDPClient.sendto(self.ismotoron, self.serverAddress)
+                UpdateElapsedTime()     
 
     def sleepcheck(self):
         self.DIG.configure(bg = "grey")
@@ -149,8 +144,8 @@ class BUTTONS():
 
         digLock = True
 
-        #SlideMotor.motor.set(0)
-        SlideMotor.motorspeed(SlideMotor,0)
+
+        #SlideMotor.motorspeed(SlideMotor,0)
 
 
         if pause == False: 
@@ -369,6 +364,8 @@ class SlideMotor():
         self.textbox.pack()
         self.textbox.bind("<Return>", self.callmotorspeed)
         self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
+        #self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1)
+        #self.motor.bind("<ButtonRelease-1>", self.motorspeed)
         self.motor.pack()
    
         self.publish6()
@@ -402,20 +399,22 @@ class SlideMotor():
             delay = int((throttle + 100)*(max - min)/200 + 500)
             delay_converted = int((throttle + 100)*5)
 
-        #     delay_converted = str(delay_converted) 
-        #     print("delay_converted = " + delay_converted)
-        #     self.delay_converted = delay_converted.encode('utf-8')
-        #     self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-        #     self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
+            delay_converted = str(delay_converted) 
+            #print("delay_converted = " + delay_converted)
+            self.delay_converted = delay_converted.encode('utf-8')
+            self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+            self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
+        
         else:
-            delay = 1500
-            delay_converted = 500
+            pass
+        #     delay = 1500
+        #     delay_converted = 500
 
-        delay_converted = str(delay_converted) 
-        print("delay_converted = " + delay_converted)
-        self.delay_converted = delay_converted.encode('utf-8')
-        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-        self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
+        # delay_converted = str(delay_converted) 
+        # print("delay_converted = " + delay_converted)
+        # self.delay_converted = delay_converted.encode('utf-8')
+        # self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+        # self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
     
         
 
@@ -443,6 +442,7 @@ class ButtonsLA():
         # self.upButton.bind('<ButtonRelease-1>', self.stop)
 
         self.downButton = Button(self.frame9, text="DOWN", bg="grey", repeatinterval=1, repeatdelay=1, width=10,height=10,command=self.down)
+        
         # self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
         # self.downButton.bind('<Button-1>', self.down)
         # self.downButton.bind('<ButtonRelease-1>', self.stop)
@@ -451,32 +451,32 @@ class ButtonsLA():
     
     def up(self):
     #def up(self,x): 
-        #if digLock == False: 
+        if digLock == False: 
             self.commandLinearActuator = 'UP\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        #else: 
-        #    pass 
+        else: 
+            pass 
         
     def down(self):
     #def down(self,x):
-        #if digLock == False:
+        if digLock == False:
             self.commandLinearActuator = 'DOWN\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        #else: 
-        #    pass
+        else: 
+            pass
         
     def stop(self,x):
-        #if digLock == False:
+        if digLock == False:
             self.commandLinearActuator = 'NONE\n'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
-        # else:
-        #     pass
+        else:
+             pass
 
     def publish7(self):
         self.frame9.grid(row=3, column=3, sticky=N)
