@@ -4,7 +4,7 @@ import threading
 from GUIPython import RootGUI, BUTTONS, RUNNING_TIMER, DataProcessing, SlideMotor, ButtonsLA 
 
 serverAddress = ('172.20.10.7', 2244)
-buffer = 128
+buffer = 2048
 UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 RootMaster = RootGUI()

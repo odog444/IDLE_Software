@@ -145,7 +145,7 @@ class BUTTONS():
         digLock = True
 
 
-        #SlideMotor.motorspeed(SlideMotor,0)
+        SlideMotor.motorspeed(SlideMotor,0)
 
 
         if pause == False: 
@@ -399,9 +399,10 @@ class SlideMotor():
             delay = int((throttle + 100)*(max - min)/200 + 500)
             delay_converted = int((throttle + 100)*5)
 
-            delay_converted = str(delay_converted) + '\n'
+            delay_converted = str(delay_converted)
             #print("delay_converted = " + delay_converted)
             self.delay_converted = delay_converted.encode('utf-8')
+            time.sleep(0.01)
             self.UDPClient.sendto(self.delay_converted, self.serverAddress)
             self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
         
@@ -454,7 +455,7 @@ class ButtonsLA():
     def up(self,x): 
         if digLock == False: 
             #while True:         # NEW LINE
-                self.commandLinearActuator = 'UP\n'
+                self.commandLinearActuator = 'UP'
                 print(self.commandLinearActuator)
                 self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
                 self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
@@ -465,7 +466,7 @@ class ButtonsLA():
     def down(self,x):
         if digLock == False:
             #while True:         # NEW LINE
-                self.commandLinearActuator = 'DOWN\n'
+                self.commandLinearActuator = 'DOWN'
                 print(self.commandLinearActuator)
                 self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
                 self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
@@ -476,7 +477,7 @@ class ButtonsLA():
     def stop(self,x):
         if digLock == False:
         #    while True: 
-            self.commandLinearActuator = 'NONE\n'
+            self.commandLinearActuator = 'NONE'
             print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
