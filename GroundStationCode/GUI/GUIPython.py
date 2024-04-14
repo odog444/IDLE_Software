@@ -10,6 +10,7 @@ import socket
 from tkinter import *
 from tkinter import ttk
 from faker import Faker
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -128,6 +129,20 @@ class BUTTONS():
             if ElapsedTime < timerup:
                 UpdateElapsedTime() 
 
+        # Stop Drum
+        delay_converted = 500
+        delay_converted = str(delay_converted) 
+        print("delay_converted = " + delay_converted)
+        self.delay_converted = delay_converted.encode('utf-8')
+        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+
+        # Raise Linear Actuator
+        self.commandLinearActuator = 'UP'
+        print(self.commandLinearActuator)
+        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+
+
 
     def stopcheck(self):
         self.DIG.configure(bg = "grey")
@@ -144,18 +159,21 @@ class BUTTONS():
 
         digLock = True
 
-
-        SlideMotor.motorspeed(SlideMotor,0)
-
-
         if pause == False: 
             pause = True
             if ElapsedTime < timerup:
                 UpdateElapsedTime()    
 
-        self.timeElapsed = str(ElapsedTime)
-        self.timeElapsed = self.timeElapsed.encode('utf-8') 
-        self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
+        delay_converted = 500
+
+        delay_converted = str(delay_converted) 
+        print("delay_converted = " + delay_converted)
+        self.delay_converted = delay_converted.encode('utf-8')
+        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+       
+        # self.timeElapsed = str(ElapsedTime)
+        # self.timeElapsed = self.timeElapsed.encode('utf-8') 
+        # self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
 
 
     def publish2(self):
@@ -256,11 +274,17 @@ class DataProcessing:
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.fig, self.ax = plt.subplots(2,2, figsize=(5, 4))
+        self.fig, self.ax = plt.subplots(2,2,figsize=(5, 4))
         self.fig2, self.ax2 = plt.subplots()
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
         self.threading = True
+
+        self.U1datatrim = []
+        self.U3datatrim = []
+        self.U4datatrim = []
+        self.xdatatrim = []
+        self.pos_count = []
     
         # pos_count = 0
         # msgfCli = 'Client'
@@ -318,32 +342,84 @@ class DataProcessing:
         msgfCli = 'Client'
         bytes2send = msgfCli.encode('utf-8')
         serverAddress = ('172.20.10.7', 2224)
-        buffer = 1024
+        buffer = 2048
         UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
         while True:
-            time.sleep(0.3)
+            time.sleep(0.5)
             UDPClient.settimeout(5)
             try:
                 UDPClient.sendto(bytes2send, serverAddress)
                 data, address = UDPClient.recvfrom(buffer)
                 line = data.decode('utf-8')
-                # print(line)
+                print(line)
                 # if line == "Temp:":
                 #     continue
                 # elif line == "Acceleration":
                 #     continue
-                # else:
+                # #else:
                 pos_count += 1
-                if (pos_count % 2) == 0:
-                    acc_values = [float(x) for x in line.split(',')]
-                    print(acc_values)
-                    self.ax.scatter(pos_count, acc_values[1])
-                    self.canvas.draw()
-                else:
-                    temp_values = [float(x) for x in line.split(',')]
-                    print(temp_values)
-                    self.ax.scatter(pos_count, temp_values[0])
-                    self.canvas.draw()
+                values = [float(x) for x in line.split(',')]
+                temp_values = values[:3]
+                acc_values = values[-3:]
+                #print(temp_values)
+
+                #Plot temperature
+                maxPoints = 100
+
+                # U1data = temp_values[0]
+                # U3data = temp_values[1]
+                # U4data = temp_values[2]
+
+                U1data = temp_values[0]
+                U3data = temp_values[1]
+                U4data = temp_values[2]
+                xdata = acc_values[0]
+
+                
+    
+                try:
+                    self.U1datatrim.append(U1data)
+                    self.U3datatrim.append(U3data)
+                    self.U4datatrim.append(U4data)
+                    self.xdatatrim.append(xdata)
+                    self.pos_count.append(pos_count)
+                    self.U1datatrim = self.U1datatrim[-maxPoints:]
+                    self.U3datatrim = self.U3datatrim[-maxPoints:]
+                    self.U4datatrim = self.U4datatrim[-maxPoints:]
+                    self.xdatatrim = self.xdatatrim[-maxPoints:]
+                    self.pos_count = self.pos_count[-maxPoints:]
+                    self.ax[0,0].cla()
+                    self.ax[0,1].cla()
+                    self.ax[1,0].cla()
+                    self.ax[1,1].cla()
+
+                except:
+                    self.U1datatrim.append(U1data)
+                    self.U3datatrim.append(U3data)
+                    self.U4datatrim.append(U4data)
+                    self.xdatatrim.append(xdata)
+                    self.pos_count.append(pos_count)
+                    self.ax[0,0].cla()
+                    self.ax[0,1].cla()
+                    self.ax[1,0].cla()
+                    self.ax[1,1].cla()
+               
+
+
+                self.ax[0,0].scatter(self.pos_count, self.U1datatrim)
+                self.ax[0,1].scatter(self.pos_count, self.U3datatrim)
+                self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
+                self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
+
+                self.ax[0,0].set_title('U1 Temperature')
+                self.ax[0,1].set_title('U3 Temperature')
+                self.ax[1,0].set_title('U4 Temperature')
+                self.ax[1,1].set_title('X Acceleration')
+
+                self.canvas.draw()
+
             except socket.timeout:
                 print("Timeout Error")
                 break
@@ -355,8 +431,8 @@ class SlideMotor():
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.commandmotorspeed = '---'
-        self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
+        #self.commandmotorspeed = '---'
+        #self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = LabelFrame(root, text="Enter an Integer between -100 and 100", padx=50, pady=20, bg="black", fg= "white")
@@ -385,6 +461,7 @@ class SlideMotor():
                 self.motorspeed(v)
         except:
             self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
+
     
         
 
@@ -408,15 +485,6 @@ class SlideMotor():
         
         else:
             pass
-        #     delay = 1500
-        #     delay_converted = 500
-
-        # delay_converted = str(delay_converted) 
-        # print("delay_converted = " + delay_converted)
-        # self.delay_converted = delay_converted.encode('utf-8')
-        # self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-        # self.frame7.config(text = "Delay = " + str(delay)  + " microseconds", font=("Helvectica", 10), fg= "white", bg = "black")
-    
         
 
     def publish6(self):
@@ -432,8 +500,8 @@ class ButtonsLA():
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        self.commandLinearActuator = 'No Command\n'
-        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        #self.commandLinearActuator = 'No Command\n'
+        #self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
 
         #self.upButton = Button(self.frame9, text="UP", bg="grey", repeatinterval=1, repeatdelay=1, width=10, height=10, command=self.up)

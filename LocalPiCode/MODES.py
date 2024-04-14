@@ -141,9 +141,11 @@ class STOPCLASS:
          self.StopMode()
 
     def StopMode(self):
+        
+        pass
 
-        # Stop drum
-        COMMONFUNCS.stopDrum(self)
+        # Stop drum- command sent by GS
+        # COMMONFUNCS.stopDrum(self)
         # Send command to Arduino?
     
         # Check elapsed time
