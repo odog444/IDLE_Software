@@ -264,13 +264,8 @@ class DataProcessing:
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
         self.fig, self.ax = plt.subplots(2,2,figsize=(5, 4))
-        # NEW CHANGES:
-        #self.fig2, self.ax2 = plt.subplots(figsize=(5,4))
-        # END CHANGES
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
-        #self.frame11 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
-        #self.canvas2 = FigureCanvasTkAgg(self.fig2, master=self.frame11)
         self.threading = True
 
         self.U1datatrim = []
@@ -288,7 +283,6 @@ class DataProcessing:
 
     def publish5(self):
         self.frame5.grid(row=3, column=0, sticky=NE)
-        #self.frame11.grid(row=3, column=1, sticky=NE)
         self.canvas.get_tk_widget().grid()
 
     def live_dat(self):
@@ -316,20 +310,13 @@ class DataProcessing:
                     temp_values = values[:3]
                     acc_values = values[-3:]
                     current_values = values[6]
-                    #Plot temperature
                     maxPoints = 50
 
                     U1data = temp_values[0]
                     U3data = temp_values[1]
                     U4data = temp_values[2]
                     xdata = acc_values[0]
-                    current = current_values[0]
-
-                # except: 
-                #     U1data = []
-                #     U3data = []
-                #     U4data = []
-                #     xdata = []
+                    current = current_values
                     
     
                     try:
@@ -349,7 +336,6 @@ class DataProcessing:
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
-                        #self.ax2.cla()
 
                     except:
                         self.U1datatrim.append(U1data)
@@ -362,7 +348,6 @@ class DataProcessing:
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
-                        #self.ax2.cla()
                 
 
 
@@ -371,17 +356,16 @@ class DataProcessing:
                     self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
                     #self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
                     self.ax[1,1].scatter(self.pos_count, self.currenttrim)
-                    #self.ax2.scatter(self.pos_count,self.currenttrim)
 
                     self.ax[0,0].set_title('U1 Temperature')
                     self.ax[0,1].set_title('U3 Temperature')
                     self.ax[1,0].set_title('U4 Temperature')
                     #self.ax[1,1].set_title('X Acceleration')
                     self.ax[1,1].set_title('Current (Amps)')
-                    #self.ax2.settitle('Current (Amps)')
 
                     self.canvas.draw()
-                    #self.canvas2.draw()
+
+
                 except:
                     pass
 
