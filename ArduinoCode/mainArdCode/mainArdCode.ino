@@ -222,9 +222,10 @@ void loop()
     digitalWrite(pwmPin, LOW);
  
   }else if (message == "Stop Mode"){
-    digitalWrite(pwmPin, LOW);
+    msDelay = 1500;
   }else if (message == "Sleep Mode"){
-    digitalWrite(pwmPin, LOW);
+    setOut();
+    msDelay = 1500;
  }else{
     //Serial.println("Undefined command received: " + message);
   }
@@ -256,4 +257,3 @@ void setOut(){
   digitalWrite(pin2, LOW);
   digitalWrite(pin3, HIGH);
 }
-
