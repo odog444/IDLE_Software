@@ -264,15 +264,20 @@ class DataProcessing:
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
         self.fig, self.ax = plt.subplots(2,2,figsize=(5, 4))
-        self.fig2, self.ax2 = plt.subplots()
+        # NEW CHANGES:
+        #self.fig2, self.ax2 = plt.subplots(figsize=(5,4))
+        # END CHANGES
         self.frame5 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
+        #self.frame11 = LabelFrame(root, text="Live Plot", padx=1, pady=1)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame5)
+        #self.canvas2 = FigureCanvasTkAgg(self.fig2, master=self.frame11)
         self.threading = True
 
         self.U1datatrim = []
         self.U3datatrim = []
         self.U4datatrim = []
         self.xdatatrim = []
+        self.currenttrim = []
         self.pos_count = []
 
         self.t1 = threading.Thread(target = self.live_dat, daemon = True)
@@ -283,6 +288,7 @@ class DataProcessing:
 
     def publish5(self):
         self.frame5.grid(row=3, column=0, sticky=NE)
+        #self.frame11.grid(row=3, column=1, sticky=NE)
         self.canvas.get_tk_widget().grid()
 
     def live_dat(self):
@@ -309,7 +315,7 @@ class DataProcessing:
                
                     temp_values = values[:3]
                     acc_values = values[-3:]
-                    #current_values = values[7]
+                    current_values = values[6]
                     #Plot temperature
                     maxPoints = 50
 
@@ -317,7 +323,7 @@ class DataProcessing:
                     U3data = temp_values[1]
                     U4data = temp_values[2]
                     xdata = acc_values[0]
-                    #current = current_values[0]
+                    current = current_values[0]
 
                 # except: 
                 #     U1data = []
@@ -332,17 +338,18 @@ class DataProcessing:
                         self.U4datatrim.append(U4data)
                         self.xdatatrim.append(xdata)
                         self.pos_count.append(pos_count)
-                        #self.currenttrim.append(current)
+                        self.currenttrim.append(current)
                         self.U1datatrim = self.U1datatrim[-maxPoints:]
                         self.U3datatrim = self.U3datatrim[-maxPoints:]
                         self.U4datatrim = self.U4datatrim[-maxPoints:]
                         self.xdatatrim = self.xdatatrim[-maxPoints:]
                         self.pos_count = self.pos_count[-maxPoints:]
-                        #self.currenttrim = self.currenttrim[-maxPoints:]
+                        self.currenttrim = self.currenttrim[-maxPoints:]
                         self.ax[0,0].cla()
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
+                        #self.ax2.cla()
 
                     except:
                         self.U1datatrim.append(U1data)
@@ -350,25 +357,31 @@ class DataProcessing:
                         self.U4datatrim.append(U4data)
                         self.xdatatrim.append(xdata)
                         self.pos_count.append(pos_count)
-                        #self.currenttrim.append(current)
+                        self.currenttrim.append(current)
                         self.ax[0,0].cla()
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
+                        #self.ax2.cla()
                 
 
 
                     self.ax[0,0].scatter(self.pos_count, self.U1datatrim)
                     self.ax[0,1].scatter(self.pos_count, self.U3datatrim)
                     self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
-                    self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
+                    #self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
+                    self.ax[1,1].scatter(self.pos_count, self.currenttrim)
+                    #self.ax2.scatter(self.pos_count,self.currenttrim)
 
                     self.ax[0,0].set_title('U1 Temperature')
                     self.ax[0,1].set_title('U3 Temperature')
                     self.ax[1,0].set_title('U4 Temperature')
-                    self.ax[1,1].set_title('X Acceleration')
+                    #self.ax[1,1].set_title('X Acceleration')
+                    self.ax[1,1].set_title('Current (Amps)')
+                    #self.ax2.settitle('Current (Amps)')
 
                     self.canvas.draw()
+                    #self.canvas2.draw()
                 except:
                     pass
 
