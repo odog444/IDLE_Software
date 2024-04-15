@@ -197,7 +197,7 @@ void loop()
 
   if(Serial.available() > 0){
     message = Serial.readStringUntil('\n');
-    Serial.println(String(message.c_str()));
+    //Serial.println(String(message.c_str()));
   }else{
     message = "No command sent";
   }

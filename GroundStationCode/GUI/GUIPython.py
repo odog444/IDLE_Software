@@ -304,60 +304,73 @@ class DataProcessing:
                 line = data.decode('utf-8')
                 print(line)
                 pos_count += 1
-                values = [float(x) for x in line.split(',')]
-                temp_values = values[:3]
-                acc_values = values[-3:]
-            
-                #Plot temperature
-                maxPoints = 50
-
-                U1data = temp_values[0]
-                U3data = temp_values[1]
-                U4data = temp_values[2]
-                xdata = acc_values[0]
-
-                
-    
-                try:
-                    self.U1datatrim.append(U1data)
-                    self.U3datatrim.append(U3data)
-                    self.U4datatrim.append(U4data)
-                    self.xdatatrim.append(xdata)
-                    self.pos_count.append(pos_count)
-                    self.U1datatrim = self.U1datatrim[-maxPoints:]
-                    self.U3datatrim = self.U3datatrim[-maxPoints:]
-                    self.U4datatrim = self.U4datatrim[-maxPoints:]
-                    self.xdatatrim = self.xdatatrim[-maxPoints:]
-                    self.pos_count = self.pos_count[-maxPoints:]
-                    self.ax[0,0].cla()
-                    self.ax[0,1].cla()
-                    self.ax[1,0].cla()
-                    self.ax[1,1].cla()
-
-                except:
-                    self.U1datatrim.append(U1data)
-                    self.U3datatrim.append(U3data)
-                    self.U4datatrim.append(U4data)
-                    self.xdatatrim.append(xdata)
-                    self.pos_count.append(pos_count)
-                    self.ax[0,0].cla()
-                    self.ax[0,1].cla()
-                    self.ax[1,0].cla()
-                    self.ax[1,1].cla()
+                try: 
+                    values = [float(x) for x in line.split(',')]
                
+                    temp_values = values[:3]
+                    acc_values = values[-3:]
+                    #current_values = values[7]
+                    #Plot temperature
+                    maxPoints = 50
+
+                    U1data = temp_values[0]
+                    U3data = temp_values[1]
+                    U4data = temp_values[2]
+                    xdata = acc_values[0]
+                    #current = current_values[0]
+
+                # except: 
+                #     U1data = []
+                #     U3data = []
+                #     U4data = []
+                #     xdata = []
+                    
+    
+                    try:
+                        self.U1datatrim.append(U1data)
+                        self.U3datatrim.append(U3data)
+                        self.U4datatrim.append(U4data)
+                        self.xdatatrim.append(xdata)
+                        self.pos_count.append(pos_count)
+                        #self.currenttrim.append(current)
+                        self.U1datatrim = self.U1datatrim[-maxPoints:]
+                        self.U3datatrim = self.U3datatrim[-maxPoints:]
+                        self.U4datatrim = self.U4datatrim[-maxPoints:]
+                        self.xdatatrim = self.xdatatrim[-maxPoints:]
+                        self.pos_count = self.pos_count[-maxPoints:]
+                        #self.currenttrim = self.currenttrim[-maxPoints:]
+                        self.ax[0,0].cla()
+                        self.ax[0,1].cla()
+                        self.ax[1,0].cla()
+                        self.ax[1,1].cla()
+
+                    except:
+                        self.U1datatrim.append(U1data)
+                        self.U3datatrim.append(U3data)
+                        self.U4datatrim.append(U4data)
+                        self.xdatatrim.append(xdata)
+                        self.pos_count.append(pos_count)
+                        #self.currenttrim.append(current)
+                        self.ax[0,0].cla()
+                        self.ax[0,1].cla()
+                        self.ax[1,0].cla()
+                        self.ax[1,1].cla()
+                
 
 
-                self.ax[0,0].scatter(self.pos_count, self.U1datatrim)
-                self.ax[0,1].scatter(self.pos_count, self.U3datatrim)
-                self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
-                self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
+                    self.ax[0,0].scatter(self.pos_count, self.U1datatrim)
+                    self.ax[0,1].scatter(self.pos_count, self.U3datatrim)
+                    self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
+                    self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
 
-                self.ax[0,0].set_title('U1 Temperature')
-                self.ax[0,1].set_title('U3 Temperature')
-                self.ax[1,0].set_title('U4 Temperature')
-                self.ax[1,1].set_title('X Acceleration')
+                    self.ax[0,0].set_title('U1 Temperature')
+                    self.ax[0,1].set_title('U3 Temperature')
+                    self.ax[1,0].set_title('U4 Temperature')
+                    self.ax[1,1].set_title('X Acceleration')
 
-                self.canvas.draw()
+                    self.canvas.draw()
+                except:
+                    pass
 
             except socket.timeout:
                 print("Timeout Error")
