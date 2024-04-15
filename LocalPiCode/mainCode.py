@@ -25,7 +25,6 @@ class COMMAND:
         self.ser.reset_input_buffer()
         self.PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) #using UDP
         self.PSock.bind((self.ServerIP,self.ServerPort))
-        readbackArd = ""
 
         self.func2c = threading.Thread(target=self.comloop, daemon=True)
         self.func2c.start()
@@ -35,11 +34,7 @@ class COMMAND:
     def comloop(self):
         while not False:
             message, address = self.PSock.recvfrom(self.buffSize) # waiting until Pi connects with client
-            message = message.decode('utf-8') 
-            try:
-                readbackArd = self.ser.readline().decode('ascii').rstrip()
-            except:
-                pass              
+            message = message.decode('utf-8')           
 
             if self.ser.in_waiting > 0: # returns the number of bytes recieved
                 time.sleep(0.01)
@@ -49,7 +44,7 @@ class COMMAND:
                 else:
                     self.ser.reset_input_buffer()
                     self.ser.write((message + '\n').encode('utf-8'))
-                    print((message + '\n').encode('utf-8'))
+
 
 ## Sensor Data Interpretation
 
@@ -92,7 +87,10 @@ class dataInterchange:
                     ser.reset_output_buffer()
                     # ser.reset_input_buffer()
                 else:
-                    self.line = ser.readline().decode('utf-8').rstrip()
+                    try:
+                        self.line = ser.readline().decode('utf-8').rstrip()
+                    except:
+                        pass
                     print(self.line)
                     self.bytesSending = self.line.encode('utf-8')
                     self.PSock.sendto(self.bytesSending,self.address)
@@ -108,3 +106,4 @@ dataThread.start()
 
 commandThread.join()
 dataThread.join()
+
