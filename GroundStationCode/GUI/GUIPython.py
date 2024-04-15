@@ -125,18 +125,18 @@ class BUTTONS():
             if ElapsedTime < timerup:
                 UpdateElapsedTime() 
 
-        # Stop Drum
-        delay_converted = 500
-        delay_converted = str(delay_converted) 
-        print("delay_converted = " + delay_converted)
-        self.delay_converted = delay_converted.encode('utf-8')
-        self.UDPClient.sendto(self.delay_converted, self.serverAddress)
+        # # Stop Drum
+        # delay_converted = 500
+        # delay_converted = str(delay_converted) 
+        # print("delay_converted = " + delay_converted)
+        # self.delay_converted = delay_converted.encode('utf-8')
+        # self.UDPClient.sendto(self.delay_converted, self.serverAddress)
 
-        # Raise Linear Actuator
-        self.commandLinearActuator = 'UP'
-        print(self.commandLinearActuator)
-        self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
-        self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
+        # # Raise Linear Actuator
+        # self.commandLinearActuator = 'UP'
+        # print(self.commandLinearActuator)
+        # self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
+        # self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
 
 
 
@@ -293,10 +293,12 @@ class DataProcessing:
         serverAddress = ('172.20.10.7', 2224)
         buffer = 2048
         UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
+        file_path = 'output_current.csv'
+        data_file = open(file_path, 'w')
+        writer = csv.writer(data_file)
 
         while True:
-            time.sleep(0.5)
+            time.sleep(0.01)
             UDPClient.settimeout(5)
             try:
                 UDPClient.sendto(bytes2send, serverAddress)
@@ -317,6 +319,8 @@ class DataProcessing:
                     U4data = temp_values[2]
                     xdata = acc_values[0]
                     current = current_values
+    
+              
                     
     
                     try:
@@ -348,6 +352,7 @@ class DataProcessing:
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
+                        
                 
 
 
@@ -364,14 +369,18 @@ class DataProcessing:
                     self.ax[1,1].set_title('Current (Amps)')
 
                     self.canvas.draw()
+                    writer.writerow(values)
+                    data_file.flush()
 
 
-                except:
+                except Exception as error:
+                    print("Error received:", error)
                     pass
 
             except socket.timeout:
                 print("Timeout Error")
                 break
+        data_file.close()
 
 
 class SlideMotor():
