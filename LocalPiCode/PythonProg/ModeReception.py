@@ -14,77 +14,101 @@ import serial
 import serial.tools.list_ports
 import csv
 import threading
-import socket
 from threading import Thread
 
-print('Server is working and listening...')
+def usleep(us):
+    startTime = time.time()
+    while((time.time() - startTime) * 1e6 > us):
+        pass
 
-#Initialize
-try:
-    ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
-except:
-    ser = serial.Serial('/dev/ttyACM1',115200, timeout = 1.0)
-
-    
-ser.setDTR(False)
-time.sleep(1)
-ser.flushInput()
-ser.setDTR(True)
-
-buffer = 2048
+buffSize = 2048
 ServerPort = 2244
 ServerIP = '172.20.10.7'
-PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
-PSock.bind((ServerIP,ServerPort))
+
+
+ser = serial.Serial('/dev/ttyACM0',9600, timeout = 1.0, xonxoff = True)
+ser.close()
+ser.open()
 ser.reset_input_buffer()
+PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) #using UDP
+PSock.bind((ServerIP,ServerPort))
+readbackArd = ""
 
-# global command
+while not False:
+    message, address = PSock.recvfrom(buffSize) # waiting until Pi connects with client
+    message = message.decode('utf-8') 
+    try:
+        readbackArd = ser.readline().decode('ascii').rstrip()
+    except:
+        pass              
+    # print("Ard:", readbackArd, "Pi:", message)
 
-def cliSer():
-    print("Communicating with GS ")
-    while True:
-        command,address = PSock.recvfrom(buffer) # waiting unit Pi connects with client (laptop)
-        command = command.decode('utf-8') + '\n'
-        try:
-            ser.write(command.encode('utf-8'))
-        except Exception as error:
-            print(f"Serial write failed with exception {error}")
-        #print(command)
+    if ser.in_waiting > 0: # returns the number of bytes recieved
         time.sleep(0.01)
-        
-        
-def senDat():
-    print("Serial is working!")
-    
-    while True:
-        # Receiving data
-        if ser.in_waiting > 0: # returns the number of bytes recieved
-            if(ser.in_waiting > buffer):
-                print("BUFFER OVERFLOW, resetting...")
-                ser.reset_input_buffer()
-            line = ser.readline().decode('utf-8').rstrip()
-            print(f"From serial: {line}")
-        else: 
-            print("Nothing in buffer...")
-        time.sleep(0.1)
-        
+#         try: #microsecond delay to match up with drum motor dlay
+#             usDelay = int(message)
+#             usleep(usDelay)
+#         except:
+#             pass
+        # print(self.ser.in_waiting)
+        if(ser.in_waiting > buffSize):
+            # print("BUFFER OVERFLOW, resetting...")
+            # ser.flush()
+            ser.reset_input_buffer()
+            ser.reset_output_buffer()
+        else:
+            ser.reset_input_buffer()
+            ser.write((message + '\n').encode('utf-8'))
+            print((message + '\n').encode('utf-8'))
+            #print(message)
+            #readbackArd = ser.read()#.decode('utf-8').rstrip()
+            #print(readbackArd)
 
-
-func1 = threading.Thread(target=cliSer, daemon=True)
-func2 = threading.Thread(target=senDat, daemon=True)
-
-
-func1.start()
-func2.start()
-
-# buffSize = 2000
-# ServerPort = 2224
-# ServerIP = '172.20.10.7'
-# bytesSending = func2.encode('utf-8')
-# PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # using UDP
-# PSock.bind((ServerIP,ServerPort))
-# message,address = PSock.recvfrom(buffSize) # waiting unit Pi connects with client
-# message = message.decode('utf-8')
-# PSock.sendto(bytesSending,address)
-
-
+# class CONTROL:
+#     def __init__(self):
+#         self.buffSize = 4096
+#         self.ServerPort = 2244
+#         self.ServerIP = '172.20.10.7'
+# 
+#         # try:
+#         #     ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0) # MUST HAVE SAME BAUD RATE AS IN ARDUINO CODE!!!
+#         # except:
+#         #     ser = serial.Serial('/dev/ttyACM1',115200, timeout = 1.0)
+#          
+#         self.ser = serial.Serial('/dev/ttyACM0',115200, timeout = 1.0)
+#         self.ser.setDTR(False)
+#         self.ser.flushInput()
+#         self.ser.setDTR(True)
+#         # self.ser.reset_input_buffer()
+#         self.ser.flush()
+#         self.message = ''
+#         
+#         func1 = threading.Thread(target=self.GetCommand, daemon=True)
+#         func2 = threading.Thread(target=self.SendCommand2Ard, daemon=True)
+#         
+#         func1.start()
+#         func2.start()
+#         func2.join()
+#         print("Serial is working!")
+#     def GetCommand(self):
+#         while not False:
+#                 self.PSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) #using UDP
+#                 self.PSock.bind((self.ServerIP,self.ServerPort))
+#                 self.message, self.address = self.PSock.recvfrom(self.buffSize) # waiting until Pi connects with client
+#                 self.message = self.message.decode('utf-8')
+#                         
+#     def SendCommand2Ard(self):
+#         while not False:
+#                 if self.ser.in_waiting > 0: # returns the number of bytes recieved
+#                     time.sleep(0.3)
+#                     # print(self.ser.in_waiting)
+#                     if(self.ser.in_waiting > self.buffSize):
+#                         print("BUFFER OVERFLOW, resetting...")
+#                         self.ser.flush()
+#                         # ser.reset_output_buffer()
+#                     else:
+#                         self.ser.write(self.message.encode('utf-8'))
+#                         print(self.message)
+#             
+#         
+# CONTROL()
