@@ -45,6 +45,7 @@ class COMMAND:
                     self.ser.write((message + '\n').encode('utf-8'))
 
 
+
 ## Sensor Data Interpretation
 
 class dataInterchange:
@@ -80,13 +81,14 @@ class dataInterchange:
         while not False:
             # Receiving data
             if ser.in_waiting > 0: # returns the number of bytes received
-                time.sleep(0.5)
+                time.sleep(0.1)
                 if(ser.out_waiting > self.buffSize):
                     print('BUFFER OVERFLOW')
                     ser.reset_output_buffer()
                     # ser.reset_input_buffer()
                 else:
                     try:
+                        ser.reset_output_buffer()
                         self.line = ser.readline().decode('utf-8').rstrip()
                     except:
                         pass
@@ -105,4 +107,5 @@ dataThread.start()
 
 commandThread.join()
 dataThread.join()
+
 
