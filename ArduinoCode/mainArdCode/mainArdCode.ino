@@ -7,6 +7,28 @@ const int U3Temp = 0x4F; // Temp sensor at top left of board
 const int U4Temp = 0x4D; // Temp sensor at bottom left of board
 int accelMeter = 0x1D; // Accelerometer
 
+// LinAct and Motor Control
+// Lin actuator pins
+const int pwmPin = 9;
+const int pin1 = 8;
+const int pin2 = 7;
+const int pin3 = 6;
+
+// Drum motor pin
+const int drumPWMpin = 3;
+
+int counter = 0;
+
+String message;
+
+float msDelay = 1500;
+
+int messageInt;
+
+float currentSens = 0.0;
+
+
+
 void tempSensorConfig(int sensorAddr){
   Wire.beginTransmission(sensorAddr);
   // Select configuration register
@@ -54,6 +76,7 @@ void setup()
   tempSensorConfig(U3Temp);
   tempSensorConfig(U4Temp);
 
+  
 
   // ****** ADXL367Z Config ****** //
   // If address of ADXL happens to be different than defined, use that address
@@ -92,68 +115,148 @@ void setup()
   Wire.write(POWER_CTL);
   Wire.endTransmission();
 
+  while(!Serial){} // For motor control setup 
+
+  // Lin act.
+  pinMode(pwmPin, OUTPUT);
+  pinMode(pin1, OUTPUT);
+  pinMode(pin2, OUTPUT);
+  pinMode(pin3, OUTPUT);
+
+  // Drum motor
+  pinMode(drumPWMpin, OUTPUT);
+
+  pinMode(A0, INPUT);
+
   delay(300); 
 }
 
 void loop()
 {
+  if(counter % 50 == 0){
+    // Convert temperature data
+    float cTempU1 = calcTemp(U1Temp);
+    float cTempU3 = calcTemp(U3Temp);
+    float cTempU4 = calcTemp(U4Temp);
+
+    // Gather and convert Accelerometer data, must be split into 3 seperate begin/endTrans because requesting more than 1 bit off a single read will trigger high
+    unsigned int accelData[3];
+    // X axis
+    Wire.beginTransmission(accelMeter);
+    Wire.write(0x08); // x-axis
+    Wire.requestFrom(accelMeter, 1);
+
+    if(Wire.available() == 1){
+      accelData[0] = Wire.read();
+    }
+
+    Wire.endTransmission();
+
+    // Y axis
+    Wire.beginTransmission(accelMeter);
+    Wire.write(0x09); // y-axis
+    Wire.requestFrom(accelMeter, 1);
+
+    if(Wire.available() == 1){
+      accelData[1] = Wire.read();
+    }
+
+    // Z axis
+    Wire.beginTransmission(accelMeter);
+    Wire.write(0x0A); // z-axis
+    Wire.requestFrom(accelMeter, 1);
+
+    if(Wire.available() == 1){
+      accelData[2] = Wire.read();
+    }
+
+    Wire.endTransmission();
+
+    Wire.endTransmission();
+
+    // Output data to serial monitor
+    Serial.print(cTempU1);
+    Serial.print(", ");
+    Serial.print(cTempU3);
+    Serial.print(", ");
+    Serial.print(cTempU4);
+    Serial.print(", ");
+
+
+    for(int i = 0; i < 3; i++){
+      Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
+      if(i != 2){Serial.print(", ");}
+    }
+    Serial.println();
+
+    // currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
+    // Serial.println(analogRead(A0));
+    // //Serial.println("Current sensor output: " + String(currentSens));
+    // Serial.println("Message: " + message + ", Message as Int: " + messageInt + ", msDelay: " + msDelay);
+  }
+
+  // For Motor Control: ##################################################
+
+  if(Serial.available() > 0){
+    message = Serial.readStringUntil('\n');
+    Serial.println(String(message.c_str()));
+  }else{
+    message = "No command sent";
+  }
+
+  // Init variables for drum
+  messageInt = message.toInt();
+
+  if (message == "UP"){
+    setOut();
+    //Serial.println("UP commanded");
+  } else if (message == "DOWN"){
+    setIn();
+    //Serial.println("DOWN commanded");
+  }else if(messageInt != 0){
+    if(message == "0"){
+      msDelay = 500;
+    }else{
+      msDelay = (messageInt * 2) + 500;
+    }
     
-  // Convert temperature data
-  float cTempU1 = calcTemp(U1Temp);
-  float cTempU3 = calcTemp(U3Temp);
-  float cTempU4 = calcTemp(U4Temp);
-
-  // Gather and convert Accelerometer data, must be split into 3 seperate begin/endTrans because requesting more than 1 bit off a single read will trigger high
-  unsigned int accelData[3];
-  // X axis
-  Wire.beginTransmission(accelMeter);
-  Wire.write(0x08); // x-axis
-  Wire.requestFrom(accelMeter, 1);
-
-  if(Wire.available() == 1){
-    accelData[0] = Wire.read();
+  }else if (message == "NONE"){
+    digitalWrite(pwmPin, LOW);
+ 
+  }else if (message == "Stop Mode"){
+    digitalWrite(pwmPin, LOW);
+  }else if (message == "Sleep Mode"){
+    digitalWrite(pwmPin, LOW);
+ }else{
+    //Serial.println("Undefined command received: " + message);
   }
+ 
 
-  Wire.endTransmission();
+  // Drive drum motor
+  digitalWrite(3, HIGH);
+  /*
+  * 500 - 1490 useconds will turn motor in reverse
+  * 1510 - 2500 useconds will turn motor forward
+  */
+  delayMicroseconds(msDelay);
+  digitalWrite(3, LOW);
+  //Serial.println(msDelay);
 
-  // Y axis
-  Wire.beginTransmission(accelMeter);
-  Wire.write(0x09); // y-axis
-  Wire.requestFrom(accelMeter, 1);
-
-  if(Wire.available() == 1){
-    accelData[1] = Wire.read();
-  }
-
-  // Z axis
-  Wire.beginTransmission(accelMeter);
-  Wire.write(0x0A); // z-axis
-  Wire.requestFrom(accelMeter, 1);
-
-  if(Wire.available() == 1){
-    accelData[2] = Wire.read();
-  }
-
-  Wire.endTransmission();
-
-  Wire.endTransmission();
-
-  // Output data to serial monitor
-  Serial.print(cTempU1);
-  Serial.print(", ");
-  Serial.print(cTempU3);
-  Serial.print(", ");
-  Serial.print(cTempU4);
-  Serial.print(", ");
-
-
-  for(int i = 0; i < 3; i++){
-    Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
-    if(i != 2){Serial.print(", ");}
-  }
-  Serial.println();
-
-  // Send data thru GPIO pins to Pi
-
-  delay(500);
+  counter++;
 }
+
+void setIn(){
+    // Set logic to move the LA Out
+  digitalWrite(pwmPin, HIGH);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, HIGH);
+  digitalWrite(pin3, HIGH);
+}
+void setOut(){
+  // Set logic to move LA In
+  digitalWrite(pwmPin, HIGH);
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, LOW);
+  digitalWrite(pin3, HIGH);
+}
+
