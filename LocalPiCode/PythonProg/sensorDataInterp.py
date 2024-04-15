@@ -20,7 +20,7 @@ from threading import Thread
 
 class dataInterchange:
     def __init__(self):
-        self.buffSize = 1024
+        self.buffSize = 2048
         self.ServerPort = 2224
         self.ServerIP = '172.20.10.7'
         self.line = '1'
@@ -28,6 +28,7 @@ class dataInterchange:
         #self.func1 = threading.Thread(target=self.cliSer, daemon=True)
         self.func2 = threading.Thread(target=self.senDat, daemon=True)
         self.func2.start()
+        self.func2.join()
 
         #self.func1.start()
 
@@ -38,11 +39,12 @@ class dataInterchange:
 
 
     def senDat(self):
-        ser = serial.Serial('/dev/ttyACMO', 9600, timeout = 1.0) #
+        ser = serial.Serial('/dev/ttyACM0', 9600, timeout = 1.0) #
         ser.setDTR(False)
         ser.flushInput()
         ser.setDTR(True)
-        ser.reset._input_buffer()
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
         print("Serial is working!")
 
         self.bytesSending = self.line.encode('utf-8')
@@ -51,21 +53,26 @@ class dataInterchange:
         print('Server is up and listening...')
         self.message, self.address = self.PSock.recvfrom(self.buffSize) # waiting until Pi connects with client
         self.message = self.message.decode('utf-8')
-
+        
+        self.counter = 0
+        
         while not False:
             # Receiving data
             if ser.in_waiting > 0: # returns the number of bytes received
-                time.sleep(0.3)
-                if(ser.in_waiting > self.buffSize):
+                time.sleep(0.5)
+                if(ser.out_waiting > self.buffSize):
                     print('BUFFER OVERFLOW')
-                    ser.reset_input_buffer()
-                else: 
+                    ser.reset_output_buffer()
+                    # ser.reset_input_buffer()
+                else:
                     self.line = ser.readline().decode('utf-8').rstrip()
                     print(self.line)
                     self.bytesSending = self.line.encode('utf-8')
                     self.PSock.sendto(self.bytesSending,self.address)
+                    self.counter += 1
 
 dataInterchange()
+
 
 
 
