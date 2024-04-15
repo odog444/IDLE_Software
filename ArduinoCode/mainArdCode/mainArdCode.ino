@@ -185,15 +185,13 @@ void loop()
 
   for(int i = 0; i < 3; i++){
     Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
-    if(i != 2){Serial.print(", ");}
+    Serial.print(", ");
   }
+
+  currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
+  Serial.print(currentSens);
+  
   Serial.println();
-
-  // currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
-  // Serial.println(analogRead(A0));
-  // //Serial.println("Current sensor output: " + String(currentSens));
-  // Serial.println("Message: " + message + ", Message as Int: " + messageInt + ", msDelay: " + msDelay);
-
 
   // For Motor Control: ##################################################
 
