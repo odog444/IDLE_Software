@@ -100,5 +100,11 @@ class dataInterchange:
 
 
 # Run commands to be threaded
-dataInterchange()
-COMMAND()
+commandThread = threading.Thread(target=COMMAND, daemon=True)
+dataThread =  threading.Thread(target=dataInterchange, daemon=True)
+
+commandThread.start()
+dataThread.start()
+
+commandThread.join()
+dataThread.join()
