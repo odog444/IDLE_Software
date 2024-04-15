@@ -1,16 +1,5 @@
 #include <Wire.h>
-int counter = 0;
 
-// Lin actuator pins
-const int pwmPin = 9;
-const int pin1 = 8;
-const int pin2 = 7;
-const int pin3 = 6;
-
-// Drum motor config
-const int drumPWMpin = 3;
-String message;
-float msDelay = 1500;
 
 // Addreses of each temp sensor (3) and accelerometer
 const int U1Temp = 0x48; // Temp sensor below accelerometer, middle right of board
@@ -53,37 +42,20 @@ float calcTemp(int sensorAddr){
   return cTemp;
 }
 
-void setIn(){ // For lin. act.
-    // Set logic to move the LA Out
-  digitalWrite(pwmPin, HIGH);
-  digitalWrite(pin1, LOW);
-  digitalWrite(pin2, HIGH);
-  digitalWrite(pin3, HIGH);
-}
-void setOut(){ // For lin. act.
-  // Set logic to move LA In
-  digitalWrite(pwmPin, HIGH);
-  digitalWrite(pin1, HIGH);
-  digitalWrite(pin2, LOW);
-  digitalWrite(pin3, HIGH);
-}
-
 void setup() 
 {
-  //********** Sensor setup **********//
   // Initialise I2C communication as MASTER
   Wire.begin();
   // Initialise Serial communication, set baud rate = 9600
-  Serial.begin(115200);
-  while(!Serial){}
+  Serial.begin(9600);
 
-  //  Temperature sensor configuration  //
+  // ****** Temperature sensor configuration ****** //
   tempSensorConfig(U1Temp);
   tempSensorConfig(U3Temp);
   tempSensorConfig(U4Temp);
 
 
-  //  ADXL367Z Config  //
+  // ****** ADXL367Z Config ****** //
   // If address of ADXL happens to be different than defined, use that address
   byte error, address;
   int deviceCount = 0;
@@ -92,7 +64,7 @@ void setup()
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
 
-    if (error == 0) {
+    if (error == 0) { 
       deviceCount++;
       // Check that the given address isn't one of the 3 temp sensors
       if(address != U1Temp && address != U3Temp && address != U4Temp){
@@ -106,9 +78,9 @@ void setup()
   Wire.beginTransmission(accelMeter);
   Wire.write(0x2D); // Address for register
   Wire.requestFrom(accelMeter, 1);
- if (Wire.available() == 1) {
-   POWER_CTL = Wire.read();
- }
+  if (Wire.available() == 1) {
+    POWER_CTL = Wire.read();
+  }
   Wire.endTransmission();
 
   // Logical Rshift twice and Lshift back to clear RHS 7 bits (so basically everything except for reserved bit), then + BIN 10 or DEC 2 for measurement mode as per datasheet
@@ -120,28 +92,16 @@ void setup()
   Wire.write(POWER_CTL);
   Wire.endTransmission();
 
-  //********** Motor control setup **********//
-  // Lin act.
-  pinMode(pwmPin, OUTPUT);
-  pinMode(pin1, OUTPUT);
-  pinMode(pin2, OUTPUT);
-  pinMode(pin3, OUTPUT);
-
-  // Drum motor
-  pinMode(drumPWMpin, OUTPUT);
-
   delay(300); 
 }
 
 void loop()
 {
-  //********** Sensor code **********//
+    
   // Convert temperature data
   float cTempU1 = calcTemp(U1Temp);
   float cTempU3 = calcTemp(U3Temp);
   float cTempU4 = calcTemp(U4Temp);
-
-  int cTempU1_int = cTempU1;
 
   // Gather and convert Accelerometer data, must be split into 3 seperate begin/endTrans because requesting more than 1 bit off a single read will trigger high
   unsigned int accelData[3];
@@ -174,60 +134,26 @@ void loop()
     accelData[2] = Wire.read();
   }
 
-//  int acc_vec [] = {accelData[0], accelData[1], accelData[2]};
-
   Wire.endTransmission();
 
   Wire.endTransmission();
 
   // Output data to serial monitor
-//  Serial.print("Temperature in Celsius for U1, U3, and U4: ");
-  Serial.println("Temp:");
   Serial.print(cTempU1);
   Serial.print(", ");
   Serial.print(cTempU3);
   Serial.print(", ");
-  Serial.println(cTempU4);
+  Serial.print(cTempU4);
+  Serial.print(", ");
 
-//  Serial.print("Acceleration data in XYZ: ");
-  Serial.println("Acceleration");
+
   for(int i = 0; i < 3; i++){
-    Serial.print(accelData[i]);
-    if(i != 2){Serial.print(",");}
+    Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
+    if(i != 2){Serial.print(", ");}
   }
   Serial.println();
- 
-  //********** Motor control code **********//
-  if(Serial.available() > 0){
-    message = Serial.readStringUntil('\n');
-  }else{
-    message = "No command sent";
-  }
 
-  // Init variables for drum
-  int messageFloat = message.toInt();
+  // Send data thru GPIO pins to Pi
 
-  if (message == "UP"){
-    setIn();
-  } else if (message == "DOWN"){
-    setOut();
-  }else if(messageFloat != 0){
-    if(message == "0"){
-      msDelay = 500;
-    }else{
-      msDelay = (messageFloat * 2) + 500;
-    }
-  }else{
-    digitalWrite(pwmPin, LOW);
-  }
-  delay(10);
-
-  // Drive drum motor
-  digitalWrite(3, HIGH);
-  /*
-  * 500 - 1490 useconds will turn motor in reverse
-  * 1510 - 2500 useconds will turn motor forward
-  */
-  delayMicroseconds(msDelay);
-  digitalWrite(3, LOW);
+  delay(500);
 }
