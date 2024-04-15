@@ -40,7 +40,6 @@ class COMMAND:
                 time.sleep(0.01)
                 if(self.ser.in_waiting > self.buffSize):
                     self.ser.reset_input_buffer()
-                    self.ser.reset_output_buffer()
                 else:
                     self.ser.reset_input_buffer()
                     self.ser.write((message + '\n').encode('utf-8'))
