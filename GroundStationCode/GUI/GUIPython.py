@@ -35,10 +35,6 @@ class RootGUI:
         self.root.geometry("1440x820")
         self.root.resizable(True,True)
         self.root.config(bg="black")
-        #self.root.columnconfigure(0, weight=1)
-        #self.root.rowconfigure(0,weight=1)
-        #sizegrip = ttk.Sizegrip(self.root)
-        #sizegrip.grid(row=1, sticky=SE)
 
 # Building Frame:
 
@@ -170,11 +166,7 @@ class BUTTONS():
         print("delay_converted = " + delay_converted)
         self.delay_converted = delay_converted.encode('utf-8')
         self.UDPClient.sendto(self.delay_converted, self.serverAddress)
-       
-        # self.timeElapsed = str(ElapsedTime)
-        # self.timeElapsed = self.timeElapsed.encode('utf-8') 
-        # self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
-
+    
 
     def publish2(self):
         self.frame.grid(row=0, column=0)
@@ -210,10 +202,7 @@ class RUNNING_TIMER():
                 pause = False
                 startNow = time.time()
                 UpdateElapsedTime()
-                # Sending Elapsed Time to Pi
-                self.timeElapsed = str(ElapsedTime)
-                self.timeElapsed = self.timeElapsed.encode('utf-8') 
-                self.UDPClient.sendto(self.timeElapsed, self.serverAddress)
+            
             else:
                 pause = True
                 if ElapsedTime < timerup:
@@ -285,51 +274,11 @@ class DataProcessing:
         self.U4datatrim = []
         self.xdatatrim = []
         self.pos_count = []
-    
-        # pos_count = 0
-        # msgfCli = 'Client'
-        # bytes2send = msgfCli.encode('utf-8')
-        # while True:
-        #     UDPClient.settimeout(5)
-        #     time.sleep(0.3)
-        #
-        #     try:
-        #         UDPClient.sendto(bytes2send, serverAddress)
-        #         data, address = UDPClient.recvfrom(buffer)
-        #         line = data.decode('utf-8')
-        #         pos_count += 1
-        #         if (pos_count % 2) == 0:
-        #             acc_values = [float(x) for x in line.split(',')]
-        #             print(acc_values)
-        #         else:
-        #             temp_values = [float(x) for x in line.split(',')]
-        #             print(temp_values)
-        #
-        #     except socket.timeout:
-        #         print("Timeout Error")
-        #         break
 
         self.t1 = threading.Thread(target = self.live_dat, daemon = True)
         self.t1.start()
 
         self.publish5()
-
-    # def readFile(self):
-    #     rows = []
-    #     while self.threading:
-    #         with open('DATA_FAKE_YIKES2.csv', 'r') as csv_file_test:
-    #             data_csv = csv.reader(csv_file_test)
-    #             self.timepassed = time.time()
-    #             self.current_time = self.timepassed - self.start_time
-    #             for line in data_csv:
-    #                 # self.ax.
-    #                 rows.append(line)
-    #                 self.rows = rows[-1]
-    #                 self.ax.scatter(self.rows,self.rows)
-    #                 self.canvas.draw()
-    #                 #print(self.rows)
-    #
-    #             time.sleep(3)
 
 
     def publish5(self):
@@ -354,23 +303,13 @@ class DataProcessing:
                 data, address = UDPClient.recvfrom(buffer)
                 line = data.decode('utf-8')
                 print(line)
-                # if line == "Temp:":
-                #     continue
-                # elif line == "Acceleration":
-                #     continue
-                # #else:
                 pos_count += 1
                 values = [float(x) for x in line.split(',')]
                 temp_values = values[:3]
                 acc_values = values[-3:]
-                #print(temp_values)
-
+            
                 #Plot temperature
-                maxPoints = 100
-
-                # U1data = temp_values[0]
-                # U3data = temp_values[1]
-                # U4data = temp_values[2]
+                maxPoints = 50
 
                 U1data = temp_values[0]
                 U3data = temp_values[1]
@@ -431,8 +370,6 @@ class SlideMotor():
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        #self.commandmotorspeed = '---'
-        #self.commandmotorspeed = self.commandmotorspeed.encode('utf-8')
         self.frame6 = LabelFrame(root, text = "Motor Throttle = 0 ", padx=25, pady=25, fg= "white", bg="black")
         self.frame7 = Label(root, text = "Delay = --- microseconds", padx=15, pady=15, fg= "white", bg="black")
         self.frame8 = LabelFrame(root, text="Enter an Integer between -100 and 100", padx=50, pady=20, bg="black", fg= "white")
@@ -440,8 +377,6 @@ class SlideMotor():
         self.textbox.pack()
         self.textbox.bind("<Return>", self.callmotorspeed)
         self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1, command=self.motorspeed)
-        #self.motor = Scale(self.frame6, from_=-100, to=100, orient=HORIZONTAL, length=600, showvalue=0, tickinterval=10, resolution=1)
-        #self.motor.bind("<ButtonRelease-1>", self.motorspeed)
         self.motor.pack()
    
         self.publish6()
@@ -462,7 +397,6 @@ class SlideMotor():
         except:
             self.frame8.config(text = "WARNING: Entry is not an integer", fg="red")
 
-    
         
 
     def motorspeed(self,v):
@@ -477,7 +411,6 @@ class SlideMotor():
             delay_converted = int((throttle + 100)*5)
 
             delay_converted = str(delay_converted)
-            #print("delay_converted = " + delay_converted)
             self.delay_converted = delay_converted.encode('utf-8')
             time.sleep(0.01)
             self.UDPClient.sendto(self.delay_converted, self.serverAddress)
@@ -500,53 +433,37 @@ class ButtonsLA():
         self.buffer = buffer
         self.UDPClient = UDPClient
         self.serverAddress = serverAddress
-        #self.commandLinearActuator = 'No Command\n'
-        #self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
         self.frame9 = LabelFrame(root, text = "Linear Actuator Control", padx=25, pady=25, fg= "white", bg="black")
-
-        #self.upButton = Button(self.frame9, text="UP", bg="grey", repeatinterval=1, repeatdelay=1, width=10, height=10, command=self.up)
-        
         self.upButton = Button(self.frame9, text="UP", bg="grey", width=10,height=10)
         self.upButton.bind('<Button-1>', self.up)
         self.upButton.bind('<ButtonRelease-1>', self.stop)
-
-        #self.downButton = Button(self.frame9, text="DOWN", bg="grey", repeatinterval=1, repeatdelay=1, width=10, height=10,command=self.down)
-        
         self.downButton = Button(self.frame9, text="DOWN", bg="grey", width=10,height=10)
         self.downButton.bind('<Button-1>', self.down)
         self.downButton.bind('<ButtonRelease-1>', self.stop)
 
         self.publish7()
 
-    
-    #def up(self):
+
     def up(self,x): 
         if digLock == False: 
-            #while True:         # NEW LINE
                 self.commandLinearActuator = 'UP'
-                print(self.commandLinearActuator)
                 self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
                 self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
             pass 
         
-    #def down(self):
     def down(self,x):
         if digLock == False:
-            #while True:         # NEW LINE
                 self.commandLinearActuator = 'DOWN'
-                print(self.commandLinearActuator)
                 self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
                 self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else: 
             pass
 
-    #def stop(self): 
+
     def stop(self,x):
         if digLock == False:
-        #    while True: 
             self.commandLinearActuator = 'NONE'
-            print(self.commandLinearActuator)
             self.commandLinearActuator = self.commandLinearActuator.encode('utf-8')
             self.UDPClient.sendto(self.commandLinearActuator, self.serverAddress)
         else:

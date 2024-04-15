@@ -133,67 +133,67 @@ void setup()
 
 void loop()
 {
-  if(counter % 50 == 0){
-    // Convert temperature data
-    float cTempU1 = calcTemp(U1Temp);
-    float cTempU3 = calcTemp(U3Temp);
-    float cTempU4 = calcTemp(U4Temp);
+  
+  // Convert temperature data
+  float cTempU1 = calcTemp(U1Temp);
+  float cTempU3 = calcTemp(U3Temp);
+  float cTempU4 = calcTemp(U4Temp);
 
-    // Gather and convert Accelerometer data, must be split into 3 seperate begin/endTrans because requesting more than 1 bit off a single read will trigger high
-    unsigned int accelData[3];
-    // X axis
-    Wire.beginTransmission(accelMeter);
-    Wire.write(0x08); // x-axis
-    Wire.requestFrom(accelMeter, 1);
+  // Gather and convert Accelerometer data, must be split into 3 seperate begin/endTrans because requesting more than 1 bit off a single read will trigger high
+  unsigned int accelData[3];
+  // X axis
+  Wire.beginTransmission(accelMeter);
+  Wire.write(0x08); // x-axis
+  Wire.requestFrom(accelMeter, 1);
 
-    if(Wire.available() == 1){
-      accelData[0] = Wire.read();
-    }
-
-    Wire.endTransmission();
-
-    // Y axis
-    Wire.beginTransmission(accelMeter);
-    Wire.write(0x09); // y-axis
-    Wire.requestFrom(accelMeter, 1);
-
-    if(Wire.available() == 1){
-      accelData[1] = Wire.read();
-    }
-
-    // Z axis
-    Wire.beginTransmission(accelMeter);
-    Wire.write(0x0A); // z-axis
-    Wire.requestFrom(accelMeter, 1);
-
-    if(Wire.available() == 1){
-      accelData[2] = Wire.read();
-    }
-
-    Wire.endTransmission();
-
-    Wire.endTransmission();
-
-    // Output data to serial monitor
-    Serial.print(cTempU1);
-    Serial.print(", ");
-    Serial.print(cTempU3);
-    Serial.print(", ");
-    Serial.print(cTempU4);
-    Serial.print(", ");
-
-
-    for(int i = 0; i < 3; i++){
-      Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
-      if(i != 2){Serial.print(", ");}
-    }
-    Serial.println();
-
-    // currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
-    // Serial.println(analogRead(A0));
-    // //Serial.println("Current sensor output: " + String(currentSens));
-    // Serial.println("Message: " + message + ", Message as Int: " + messageInt + ", msDelay: " + msDelay);
+  if(Wire.available() == 1){
+    accelData[0] = Wire.read();
   }
+
+  Wire.endTransmission();
+
+  // Y axis
+  Wire.beginTransmission(accelMeter);
+  Wire.write(0x09); // y-axis
+  Wire.requestFrom(accelMeter, 1);
+
+  if(Wire.available() == 1){
+    accelData[1] = Wire.read();
+  }
+
+  // Z axis
+  Wire.beginTransmission(accelMeter);
+  Wire.write(0x0A); // z-axis
+  Wire.requestFrom(accelMeter, 1);
+
+  if(Wire.available() == 1){
+    accelData[2] = Wire.read();
+  }
+
+  Wire.endTransmission();
+
+  Wire.endTransmission();
+
+  // Output data to serial monitor
+  Serial.print(cTempU1);
+  Serial.print(", ");
+  Serial.print(cTempU3);
+  Serial.print(", ");
+  Serial.print(cTempU4);
+  Serial.print(", ");
+
+
+  for(int i = 0; i < 3; i++){
+    Serial.print(accelData[i]); // ############### Work is needed to interpret raw accel data into angles ####################
+    if(i != 2){Serial.print(", ");}
+  }
+  Serial.println();
+
+  // currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
+  // Serial.println(analogRead(A0));
+  // //Serial.println("Current sensor output: " + String(currentSens));
+  // Serial.println("Message: " + message + ", Message as Int: " + messageInt + ", msDelay: " + msDelay);
+
 
   // For Motor Control: ##################################################
 
@@ -242,7 +242,6 @@ void loop()
   digitalWrite(3, LOW);
   //Serial.println(msDelay);
 
-  counter++;
 }
 
 void setIn(){
