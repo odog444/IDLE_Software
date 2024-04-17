@@ -25,17 +25,9 @@ class dataInterchange:
         self.ServerIP = '172.20.10.7'
         self.line = '1'
 
-        #self.func1 = threading.Thread(target=self.cliSer, daemon=True)
         self.func2 = threading.Thread(target=self.senDat, daemon=True)
         self.func2.start()
         self.func2.join()
-
-        #self.func1.start()
-
-    
-    #defcliSer(self)
-
-
 
 
     def senDat(self):

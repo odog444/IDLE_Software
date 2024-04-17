@@ -285,6 +285,7 @@ class DataProcessing:
         self.frame5.grid(row=3, column=0, sticky=NE)
         self.canvas.get_tk_widget().grid()
 
+
     def live_dat(self):
         self.threading = True
         pos_count = 0
@@ -319,8 +320,6 @@ class DataProcessing:
                     U4data = temp_values[2]
                     xdata = acc_values[0]
                     current = current_values
-    
-              
                     
     
                     try:
@@ -340,6 +339,7 @@ class DataProcessing:
                         self.ax[0,1].cla()
                         self.ax[1,0].cla()
                         self.ax[1,1].cla()
+                    
 
                     except:
                         self.U1datatrim.append(U1data)
@@ -361,12 +361,17 @@ class DataProcessing:
                     self.ax[1,0].scatter(self.pos_count, self.U4datatrim)
                     #self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
                     self.ax[1,1].scatter(self.pos_count, self.currenttrim)
+                    
+
+
 
                     self.ax[0,0].set_title('U1 Temperature')
                     self.ax[0,1].set_title('U3 Temperature')
                     self.ax[1,0].set_title('U4 Temperature')
                     #self.ax[1,1].set_title('X Acceleration')
                     self.ax[1,1].set_title('Current (Amps)')
+                   
+
 
                     self.canvas.draw()
                     writer.writerow(values)
