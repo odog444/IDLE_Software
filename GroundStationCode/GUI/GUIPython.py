@@ -312,14 +312,16 @@ class DataProcessing:
                
                     temp_values = values[:3]
                     acc_values = values[-3:]
-                    current_values = values[6]
+                    #current_values = values[6]
+                    voltage_values = values[6]
                     maxPoints = 50
 
                     U1data = temp_values[0]
                     U3data = temp_values[1]
                     U4data = temp_values[2]
                     xdata = acc_values[0]
-                    current = current_values
+                    #current = current_values
+                    current = (5 * (voltage_values/1023) - 2.46) / 0.05
                     
     
                     try:
