@@ -289,12 +289,17 @@ class DataProcessing:
         self.canvas.get_tk_widget().grid()
 
     def plot_data(self):
-
+        
         self.ax[0, 0].scatter(self.pos_count, self.U1datatrim)
         self.ax[0, 1].scatter(self.pos_count, self.U3datatrim)
         self.ax[1, 0].scatter(self.pos_count, self.U4datatrim)
         # self.ax[1,1].scatter(self.pos_count, self.xdatatrim)
         self.ax[1, 1].scatter(self.pos_count, self.currenttrim)
+        
+        self.ax[0,0].cla()
+        self.ax[0,1].cla()
+        self.ax[1,0].cla()
+        self.ax[1,1].cla()
 
         self.ax[0, 0].set_title('U1 Temperature')
         self.ax[0, 1].set_title('U3 Temperature')
@@ -354,10 +359,6 @@ class DataProcessing:
                         self.xdatatrim = self.xdatatrim[-maxPoints:]
                         self.pos_count = self.pos_count[-maxPoints:]
                         self.currenttrim = self.currenttrim[-maxPoints:]
-                        self.ax[0,0].cla()
-                        self.ax[0,1].cla()
-                        self.ax[1,0].cla()
-                        self.ax[1,1].cla()
                     
 
                     except:
@@ -367,10 +368,6 @@ class DataProcessing:
                         self.xdatatrim.append(xdata)
                         self.pos_count.append(pos_count)
                         self.currenttrim.append(current)
-                        self.ax[0,0].cla()
-                        self.ax[0,1].cla()
-                        self.ax[1,0].cla()
-                        self.ax[1,1].cla()
                         
                 
 

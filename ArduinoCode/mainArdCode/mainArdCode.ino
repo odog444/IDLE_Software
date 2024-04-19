@@ -27,6 +27,8 @@ int messageInt;
 
 float currentSens = 0.0;
 
+float voltage[100];
+
 
 
 void tempSensorConfig(int sensorAddr){
@@ -126,7 +128,12 @@ void setup()
   // Drum motor
   pinMode(drumPWMpin, OUTPUT);
 
-  pinMode(A0, INPUT);
+  // Current sensor and populate voltage array
+  pinMode(1, INPUT);
+
+  for(int i = 0; i < 100; i++){
+    voltage[i] = (5 * (float(analogRead(A1)) / 1023));
+  }
 
   delay(300); 
 }
@@ -188,10 +195,19 @@ void loop()
     Serial.print(", ");
   }
 
-  currentSens = ((5 * (float(analogRead(A0)) / 1023)) - 2.5) / 0.05;
-  Serial.print(currentSens);
+  voltage[counter] = (5 * (float(analogRead(A1))) / 1024);
+
+  float sum = 0.0;
+  for(int i = 0; i < 100; i++){
+    sum += voltage[i];
+  }
+  //sum = sum / 1024;
+
+  //currentSens = ((sum / 100) - 2.5) / 0.05;
+  Serial.print((sum / 100));
   
-  Serial.println();
+  counter = (counter++) % 100;
+
 
   // For Motor Control: ##################################################
 
@@ -204,6 +220,10 @@ void loop()
 
   // Init variables for drum
   messageInt = message.toInt();
+
+  // Send associated throttle data with the voltage
+  Serial.print(", " + String(messageInt));
+  Serial.println();
 
   if (message == "UP"){
     setOut();
