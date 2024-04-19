@@ -206,7 +206,7 @@ void loop()
   //currentSens = ((sum / 100) - 2.5) / 0.05;
   Serial.print((sum / 100));
   
-  counter = (counter++) % 100;
+  counter = (++counter) % 100;
 
 
   // For Motor Control: ##################################################
